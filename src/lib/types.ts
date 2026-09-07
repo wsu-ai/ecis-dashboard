@@ -1,6 +1,6 @@
-export type Role = '교원' | '조교' | '스태프'
-export type Status = '접수' | '진행중' | '완료' | '보류'
-export type Priority = '낮음' | '보통' | '높음'
+export type Role = 'Faculty' | 'Assistant' | 'Staff'
+export type Status = 'Received' | 'In Progress' | 'Completed' | 'On Hold'
+export type Priority = 'Low' | 'Medium' | 'High'
 
 export type Profile = {
   id: string

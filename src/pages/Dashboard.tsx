@@ -8,7 +8,7 @@ type SortDir = 'asc' | 'desc'
 const todayStr = () => new Date().toISOString().slice(0, 10)
 
 function isOverdue(t: TaskWithOwner): boolean {
-  return !!t.due_date && t.due_date < todayStr() && t.status !== '완료' && !t.deleted_at
+  return !!t.due_date && t.due_date < todayStr() && t.status !== 'Completed' && !t.deleted_at
 }
 
 export default function Dashboard() {
@@ -24,7 +24,7 @@ export default function Dashboard() {
     try {
       setTasks(await fetchAllTasks())
     } catch (e: any) {
-      setErr(e?.message || '업무 목록을 불러오지 못했습니다.')
+      setErr(e?.message || 'Failed to load the task list.')
     } finally {
       setLoading(false)
     }
@@ -58,13 +58,13 @@ export default function Dashboard() {
     <div className="dash">
       <div className="dash-toolbar">
         <div className="dash-tabs">
-          <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>전체 업무</button>
-          <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>삭제된 업무</button>
+          <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>All Tasks</button>
+          <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
         </div>
-        <button className="ghost" onClick={load}>새로고침</button>
+        <button className="ghost" onClick={load}>Refresh</button>
       </div>
 
-      {loading && <p className="hint">불러오는 중…</p>}
+      {loading && <p className="hint">Loading…</p>}
       {err && <p className="hint err">{err}</p>}
 
       {!loading && !err && (
@@ -72,17 +72,17 @@ export default function Dashboard() {
           <table className="task-table">
             <thead>
               <tr>
-                <th>제목</th>
-                <th className="sortable" onClick={() => toggleSort('requesting_org')}>요청 부서{sortArrow('requesting_org')}</th>
-                <th>담당자</th>
-                <th>상태</th>
-                <th className="sortable" onClick={() => toggleSort('due_date')}>마감일{sortArrow('due_date')}</th>
-                {showDeleted && <th>삭제자 / 삭제일시</th>}
+                <th>Title</th>
+                <th className="sortable" onClick={() => toggleSort('requesting_org')}>Requesting Dept.{sortArrow('requesting_org')}</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th className="sortable" onClick={() => toggleSort('due_date')}>Due Date{sortArrow('due_date')}</th>
+                {showDeleted && <th>Deleted By / At</th>}
               </tr>
             </thead>
             <tbody>
               {visible.length === 0 && (
-                <tr><td colSpan={showDeleted ? 6 : 5} className="empty">표시할 업무가 없습니다.</td></tr>
+                <tr><td colSpan={showDeleted ? 6 : 5} className="empty">No tasks to show.</td></tr>
               )}
               {visible.map((t) => (
                 <tr key={t.id} className={isOverdue(t) ? 'overdue' : ''}>
@@ -90,7 +90,7 @@ export default function Dashboard() {
                   <td>{t.requesting_org || '-'}</td>
                   <td>{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                   <td>{t.status}</td>
-                  <td>{t.due_date || '미정'}</td>
+                  <td>{t.due_date || 'TBD'}</td>
                   {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 </tr>
               ))}

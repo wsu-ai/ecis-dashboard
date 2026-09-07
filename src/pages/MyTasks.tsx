@@ -5,8 +5,10 @@ import type { Task } from '../lib/types'
 const emptyInput: TaskInput = {
   title: '', description: '', requesting_org: '', requesting_org_id: '',
   submission_method: '', contact_info: '', required_documents: '',
-  status: '접수', priority: '보통', due_date: '',
+  status: 'Received', priority: 'Medium', due_date: '',
 }
+
+const statusSlug = (status: string) => status.toLowerCase().replace(/\s+/g, '-')
 
 export default function MyTasks({ userId }: { userId: string }) {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -23,7 +25,7 @@ export default function MyTasks({ userId }: { userId: string }) {
     try {
       setTasks(await fetchMyTasks(userId))
     } catch (e: any) {
-      setErr(e?.message || '업무 목록을 불러오지 못했습니다.')
+      setErr(e?.message || 'Failed to load the task list.')
     } finally {
       setLoading(false)
     }
@@ -55,49 +57,49 @@ export default function MyTasks({ userId }: { userId: string }) {
       setModalOpen(false)
       await load()
     } catch (e: any) {
-      alert(e?.message || '저장에 실패했습니다.')
+      alert(e?.message || 'Failed to save.')
     } finally {
       setSaving(false)
     }
   }
 
   async function remove(t: Task) {
-    if (!confirm(`"${t.title}" 업무를 삭제하시겠습니까? (기록은 남고 대시보드에서 조회 가능합니다)`)) return
+    if (!confirm(`Delete "${t.title}"? (This is kept as a record and stays visible on the dashboard.)`)) return
     try {
       await softDeleteTask(t.id, userId)
       await load()
     } catch (e: any) {
-      alert(e?.message || '삭제에 실패했습니다.')
+      alert(e?.message || 'Failed to delete.')
     }
   }
 
   return (
     <div className="mytasks">
       <div className="dash-toolbar">
-        <h2>내 업무</h2>
-        <button className="primary" onClick={openCreate}>+ 새 업무 등록</button>
+        <h2>My Tasks</h2>
+        <button className="primary" onClick={openCreate}>+ New Task</button>
       </div>
 
-      {loading && <p className="hint">불러오는 중…</p>}
+      {loading && <p className="hint">Loading…</p>}
       {err && <p className="hint err">{err}</p>}
 
       {!loading && !err && (
         <div className="card-list">
-          {tasks.length === 0 && <p className="hint">등록된 업무가 없습니다.</p>}
+          {tasks.length === 0 && <p className="hint">No tasks registered yet.</p>}
           {tasks.map((t) => (
             <div className="task-card" key={t.id}>
               <div className="task-card-head">
                 <b>{t.title}</b>
-                <span className={`badge status-${t.status}`}>{t.status}</span>
+                <span className={`badge status-${statusSlug(t.status)}`}>{t.status}</span>
               </div>
               <p className="task-card-meta">
-                {t.requesting_org && <>요청부서: {t.requesting_org} · </>}
-                마감일: {t.due_date || '미정'} · 우선순위: {t.priority}
+                {t.requesting_org && <>Requesting dept.: {t.requesting_org} · </>}
+                Due: {t.due_date || 'TBD'} · Priority: {t.priority}
               </p>
               {t.description && <p className="task-card-desc">{t.description}</p>}
               <div className="task-card-actions">
-                <button className="ghost" onClick={() => openEdit(t)}>수정</button>
-                <button className="ghost danger" onClick={() => remove(t)}>삭제</button>
+                <button className="ghost" onClick={() => openEdit(t)}>Edit</button>
+                <button className="ghost danger" onClick={() => remove(t)}>Delete</button>
               </div>
             </div>
           ))}
@@ -107,69 +109,69 @@ export default function MyTasks({ userId }: { userId: string }) {
       {modalOpen && (
         <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
           <div className="modal-card wide" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">{editingId ? '업무 수정' : '새 업무 등록'}</h2>
+            <h2 className="modal-title">{editingId ? 'Edit Task' : 'New Task'}</h2>
 
             <label className="field">
-              <span>제목 *</span>
+              <span>Title *</span>
               <input value={input.title} onChange={(e) => setInput({ ...input, title: e.target.value })} />
             </label>
             <label className="field">
-              <span>설명</span>
+              <span>Description</span>
               <textarea value={input.description} onChange={(e) => setInput({ ...input, description: e.target.value })} rows={3} />
             </label>
 
             <div className="field-row">
               <label className="field">
-                <span>요청 부서</span>
+                <span>Requesting Department</span>
                 <input value={input.requesting_org} onChange={(e) => setInput({ ...input, requesting_org: e.target.value })} />
               </label>
               <label className="field">
-                <span>업무등록번호</span>
-                <input value={input.requesting_org_id} onChange={(e) => setInput({ ...input, requesting_org_id: e.target.value })} placeholder="예: 교원인사과-2442" />
+                <span>Reference No.</span>
+                <input value={input.requesting_org_id} onChange={(e) => setInput({ ...input, requesting_org_id: e.target.value })} placeholder="e.g. Faculty-Affairs-2442" />
               </label>
             </div>
 
             <label className="field">
-              <span>제출방법</span>
-              <input value={input.submission_method} onChange={(e) => setInput({ ...input, submission_method: e.target.value })} placeholder="예: 이메일 제출, 온라인 시스템 업로드 등" />
+              <span>Submission Method</span>
+              <input value={input.submission_method} onChange={(e) => setInput({ ...input, submission_method: e.target.value })} placeholder="e.g. Email, online portal upload, etc." />
             </label>
             <label className="field">
-              <span>문의사항 연락처</span>
-              <input value={input.contact_info} onChange={(e) => setInput({ ...input, contact_info: e.target.value })} placeholder="예: 담당자명, 전화번호, 이메일" />
+              <span>Contact Info</span>
+              <input value={input.contact_info} onChange={(e) => setInput({ ...input, contact_info: e.target.value })} placeholder="e.g. contact name, phone, email" />
             </label>
             <label className="field">
-              <span>제출서류</span>
-              <input value={input.required_documents} onChange={(e) => setInput({ ...input, required_documents: e.target.value })} placeholder="예: 재직증명서, 동의서" />
+              <span>Required Documents</span>
+              <input value={input.required_documents} onChange={(e) => setInput({ ...input, required_documents: e.target.value })} placeholder="e.g. employment certificate, consent form" />
             </label>
 
             <div className="field-row">
               <label className="field">
-                <span>상태</span>
+                <span>Status</span>
                 <select value={input.status} onChange={(e) => setInput({ ...input, status: e.target.value as TaskInput['status'] })}>
-                  <option value="접수">접수</option>
-                  <option value="진행중">진행중</option>
-                  <option value="완료">완료</option>
-                  <option value="보류">보류</option>
+                  <option value="Received">Received</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                  <option value="On Hold">On Hold</option>
                 </select>
               </label>
               <label className="field">
-                <span>우선순위</span>
+                <span>Priority</span>
                 <select value={input.priority} onChange={(e) => setInput({ ...input, priority: e.target.value as TaskInput['priority'] })}>
-                  <option value="낮음">낮음</option>
-                  <option value="보통">보통</option>
-                  <option value="높음">높음</option>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
                 </select>
               </label>
               <label className="field">
-                <span>마감일</span>
+                <span>Due Date</span>
                 <input type="date" value={input.due_date} onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
               </label>
             </div>
 
             <div className="modal-actions">
-              <button className="ghost" onClick={() => setModalOpen(false)}>취소</button>
+              <button className="ghost" onClick={() => setModalOpen(false)}>Cancel</button>
               <button className="primary modal-ok" disabled={saving || !input.title.trim()} onClick={save}>
-                {saving ? '저장 중…' : '저장'}
+                {saving ? 'Saving…' : 'Save'}
               </button>
             </div>
           </div>

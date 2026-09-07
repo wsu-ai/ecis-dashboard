@@ -14,7 +14,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loadingProfile, setLoadingProfile] = useState(true)
-  const [tab, setTab] = useState<Tab>('dashboard') // 첫 진입 = 대시보드(전체 업무)
+  const [tab, setTab] = useState<Tab>('dashboard') // land on the dashboard (all tasks) first
 
   useEffect(() => {
     if (!hasSupabase()) { setLoadingProfile(false); return }
@@ -35,30 +35,30 @@ export default function App() {
     return (
       <div className="auth-screen">
         <div className="auth-card">
-          <h1>설정 필요</h1>
-          <p className="hint">서버 설정(Supabase)이 아직 없습니다. .env.local에 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY를 넣어주세요.</p>
+          <h1>Setup Required</h1>
+          <p className="hint">Server (Supabase) is not configured yet. Add VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY to .env.local.</p>
         </div>
       </div>
     )
   }
 
   if (!session) return <Login />
-  if (loadingProfile) return <div className="auth-screen"><p className="hint">불러오는 중…</p></div>
+  if (loadingProfile) return <div className="auth-screen"><p className="hint">Loading…</p></div>
   if (!profile) return <ProfileSetup userId={session.user.id} onDone={setProfile} />
 
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>대학 업무 관리 대시보드</h1>
+        <h1>University Task Dashboard</h1>
         <div className="app-header-right">
           <span className="who">{profile.name} ({profile.department})</span>
-          <button className="ghost" onClick={() => signOut()}>로그아웃</button>
+          <button className="ghost" onClick={() => signOut()}>Log out</button>
         </div>
       </header>
 
       <nav className="app-tabs">
-        <button className={tab === 'dashboard' ? 'on' : ''} onClick={() => setTab('dashboard')}>대시보드</button>
-        <button className={tab === 'mytasks' ? 'on' : ''} onClick={() => setTab('mytasks')}>내 업무</button>
+        <button className={tab === 'dashboard' ? 'on' : ''} onClick={() => setTab('dashboard')}>Dashboard</button>
+        <button className={tab === 'mytasks' ? 'on' : ''} onClick={() => setTab('mytasks')}>My Tasks</button>
       </nav>
 
       <main className="app-main">

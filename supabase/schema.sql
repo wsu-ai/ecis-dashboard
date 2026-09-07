@@ -5,7 +5,7 @@ create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   name text not null default '',
   department text not null default '',
-  role text not null default '스태프' check (role in ('교원', '조교', '스태프')),
+  role text not null default 'Staff' check (role in ('Faculty', 'Assistant', 'Staff')),
   created_at timestamptz not null default now()
 );
 
@@ -38,8 +38,8 @@ create table if not exists tasks (
   contact_info text,         -- 문의사항 연락처
   required_documents text,   -- 제출서류
 
-  status text not null default '접수' check (status in ('접수', '진행중', '완료', '보류')),
-  priority text not null default '보통' check (priority in ('낮음', '보통', '높음')),
+  status text not null default 'Received' check (status in ('Received', 'In Progress', 'Completed', 'On Hold')),
+  priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High')),
   due_date date,
 
   -- 소프트 삭제: 실제 DELETE는 RLS로 막고, 이 두 컬럼만 채워서 "삭제 처리"한다.

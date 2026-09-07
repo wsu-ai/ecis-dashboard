@@ -67,8 +67,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-card-desc{font-size:13px;color:var(--ink);margin:8px 0 0;line-height:1.5}
 .task-card-actions{display:flex;gap:8px;margin-top:12px}
 .badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--tealbg);color:var(--teal)}
-.badge.status-완료{background:#eef7ee;color:#2f7a3a}
-.badge.status-보류{background:#f3f1eb;color:var(--gray)}
+.badge.status-completed{background:#eef7ee;color:#2f7a3a}
+.badge.status-on-hold{background:#f3f1eb;color:var(--gray)}
 
 /* ── 모달 ── */
 .modal-backdrop{position:fixed;inset:0;z-index:50;background:rgba(40,38,30,.4);display:flex;align-items:center;justify-content:center;padding:20px}
