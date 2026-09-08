@@ -12,6 +12,10 @@ export default function Login() {
   async function submit() {
     setErr(''); setNotice('')
     if (!email.trim() || !password.trim()) return
+    if (!/@(.*\.)?wsu\.ac\.kr$/i.test(email.trim())) {
+      setErr('Email address must be a valid Woosong email address.')
+      return
+    }
     setBusy(true)
     try {
       if (mode === 'signin') {
@@ -46,11 +50,11 @@ export default function Login() {
         <p className="auth-sub">{mode === 'signin' ? 'Sign In' : 'Sign Up'}</p>
 
         <label className="field">
-          <span>Email</span>
+          <span>Email <span className="label-note">(Your Woosong email address)</span></span>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         </label>
         <label className="field">
-          <span>Password</span>
+          <span>Password <span className="label-note">(must be at least 6 characters)</span></span>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
             autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
             onKeyDown={(e) => { if (e.key === 'Enter') submit() }} />

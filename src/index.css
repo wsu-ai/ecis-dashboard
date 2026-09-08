@@ -24,7 +24,8 @@ h1,h2{margin:0}
 
 /* ── 공통 폼 요소 ── */
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.field>span{font-size:13px;font-weight:500;color:var(--gray)}
+.field>span{font-size:13px;font-weight:700;color:var(--gray)}
+.field>span .label-note{font-weight:400}
 .field-row{display:flex;gap:12px}
 .field-row .field{flex:1}
 input,select,textarea{height:44px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-size:14px;font-family:var(--font);color:var(--ink);background:#fff;width:100%}
