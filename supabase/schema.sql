@@ -43,7 +43,7 @@ create table if not exists tasks (
 
   status text not null default 'Received' check (status in ('Received', 'In Progress', 'Completed', 'On Hold')),
   priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High')),
-  due_date date,
+  due_date timestamptz,   -- 마감 일시
 
   -- 소프트 삭제: 실제 DELETE는 RLS로 막고, 이 두 컬럼만 채워서 "삭제 처리"한다.
   deleted_at timestamptz,

@@ -22,7 +22,7 @@ export type Task = {
   required_documents: string | null
   status: Status
   priority: Priority
-  due_date: string | null // YYYY-MM-DD
+  due_date: string | null // ISO timestamp (timestamptz)
   deleted_at: string | null
   deleted_by: string | null
   created_at: string

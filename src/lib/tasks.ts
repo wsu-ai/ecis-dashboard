@@ -37,14 +37,21 @@ export type TaskInput = {
   required_documents: string
   status: Task['status']
   priority: Task['priority']
-  due_date: string // '' 허용(미정)
+  due_date: string // datetime-local 값 "YYYY-MM-DDTHH:MM", '' 허용(미정)
+}
+
+// datetime-local(로컬 시간) → timestamptz용 ISO 문자열
+function dueToIso(v: string): string | null {
+  if (!v) return null
+  const d = new Date(v)
+  return Number.isNaN(d.getTime()) ? null : d.toISOString()
 }
 
 export async function createTask(ownerId: string, input: TaskInput) {
   const { error } = await supabase.from('tasks').insert({
     owner_id: ownerId,
     ...input,
-    due_date: input.due_date || null,
+    due_date: dueToIso(input.due_date),
   })
   if (error) throw error
 }
@@ -52,7 +59,7 @@ export async function createTask(ownerId: string, input: TaskInput) {
 export async function updateTask(id: string, input: TaskInput) {
   const { error } = await supabase
     .from('tasks')
-    .update({ ...input, due_date: input.due_date || null })
+    .update({ ...input, due_date: dueToIso(input.due_date) })
     .eq('id', id)
   if (error) throw error
 }

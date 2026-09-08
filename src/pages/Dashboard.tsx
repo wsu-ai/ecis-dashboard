@@ -1,23 +1,38 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllTasks } from '../lib/tasks'
-import type { TaskWithOwner } from '../lib/types'
+import type { Priority, TaskWithOwner } from '../lib/types'
+import { formatDueDate } from '../lib/format'
+import TaskFormModal from '../components/TaskFormModal'
 
 type SortKey = 'requesting_org' | 'due_date'
 type SortDir = 'asc' | 'desc'
 
-const todayStr = () => new Date().toISOString().slice(0, 10)
+const WEEK_MS = 7 * 86_400_000
 
 function isOverdue(t: TaskWithOwner): boolean {
-  return !!t.due_date && t.due_date < todayStr() && t.status !== 'Completed' && !t.deleted_at
+  return !!t.due_date && new Date(t.due_date).getTime() < Date.now()
+    && t.status !== 'Completed' && !t.deleted_at
 }
 
-export default function Dashboard() {
+// 마감이 일주일 이내(초과 포함)면 자동으로 High로 격상해서 표시한다. DB 값은 바꾸지 않는다.
+function effectivePriority(t: TaskWithOwner): Priority {
+  if (!t.deleted_at && t.status !== 'Completed' && t.due_date
+    && new Date(t.due_date).getTime() - Date.now() <= WEEK_MS) {
+    return 'High'
+  }
+  return t.priority
+}
+
+const prioClass = (p: Priority) => `prio-${p.toLowerCase()}`
+
+export default function Dashboard({ userId }: { userId: string }) {
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('due_date')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [showDeleted, setShowDeleted] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
 
   async function load() {
     setLoading(true); setErr('')
@@ -61,7 +76,10 @@ export default function Dashboard() {
           <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>All Tasks</button>
           <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
         </div>
-        <button className="ghost" onClick={load}>Refresh</button>
+        <div className="dash-toolbar-actions">
+          <button className="primary" onClick={() => setModalOpen(true)}>New Task+</button>
+          <button className="ghost" onClick={load}>Refresh</button>
+        </div>
       </div>
 
       {loading && <p className="hint">Loading…</p>}
@@ -72,9 +90,10 @@ export default function Dashboard() {
           <table className="task-table">
             <thead>
               <tr>
+                <th className="col-prio">Priority</th>
                 <th>Title</th>
                 <th className="sortable" onClick={() => toggleSort('requesting_org')}>Requesting Dept.{sortArrow('requesting_org')}</th>
-                <th>Owner</th>
+                <th>Entered By</th>
                 <th>Status</th>
                 <th className="sortable" onClick={() => toggleSort('due_date')}>Due Date{sortArrow('due_date')}</th>
                 {showDeleted && <th>Deleted By / At</th>}
@@ -82,21 +101,34 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {visible.length === 0 && (
-                <tr><td colSpan={showDeleted ? 6 : 5} className="empty">No tasks to show.</td></tr>
+                <tr><td colSpan={showDeleted ? 7 : 6} className="empty">No tasks to show.</td></tr>
               )}
-              {visible.map((t) => (
-                <tr key={t.id} className={isOverdue(t) ? 'overdue' : ''}>
+              {visible.map((t) => {
+                const ep = effectivePriority(t)
+                return (
+                <tr key={t.id} className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}>
+                  <td className="col-prio"><span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} /></td>
                   <td>{t.title}</td>
                   <td>{t.requesting_org || '-'}</td>
                   <td>{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                   <td>{t.status}</td>
-                  <td>{t.due_date || 'TBD'}</td>
+                  <td>{t.due_date ? formatDueDate(t.due_date) : 'TBD'}</td>
                   {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
+      )}
+
+      {modalOpen && (
+        <TaskFormModal
+          userId={userId}
+          task={null}
+          onClose={() => setModalOpen(false)}
+          onSaved={load}
+        />
       )}
     </div>
   )

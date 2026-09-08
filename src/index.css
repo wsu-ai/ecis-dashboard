@@ -52,6 +52,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 
 /* ── 대시보드 ── */
 .dash-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px}
+.dash-toolbar-actions{display:flex;align-items:center;gap:8px}
 .dash-tabs{display:flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
 .dash-tabs button{border:none;background:transparent;padding:8px 14px;border-radius:7px;font-size:13px;font-weight:600;color:var(--gray)}
 .dash-tabs button.on{background:var(--teal);color:#fff}
@@ -63,6 +64,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table tbody tr:last-child td{border-bottom:none}
 .task-table tr.overdue td{color:var(--live);font-weight:600}
 .task-table td.empty{color:var(--faint);text-align:center;padding:28px}
+
+/* ── 우선순위: 색 원 + 행 배경 ── */
+.task-table th.col-prio,.task-table td.col-prio{text-align:center;width:72px}
+.prio-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle}
+.prio-dot.prio-high{background:#D64541}
+.prio-dot.prio-medium{background:#E8B004}
+.prio-dot.prio-low{background:#3FA45B}
+.task-table tr.prio-high td{background:rgba(214,69,65,.10)}
+.task-table tr.prio-medium td{background:rgba(232,176,4,.13)}
+.task-table tr.prio-low td{background:rgba(63,164,91,.10)}
 
 /* ── 내 업무: 카드 목록 ── */
 .card-list{display:flex;flex-direction:column;gap:12px}
