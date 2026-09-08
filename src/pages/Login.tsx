@@ -34,7 +34,7 @@ export default function Login() {
     } catch (e: any) {
       const msg: string = e?.message || ''
       if (/failed to fetch|load failed|networkerror/i.test(msg)) {
-        setErr('Login information not valid. Please check your email address and password; then try again.')
+        setErr('Cannot reach the server. Please try again in a moment, or contact the administrator if this continues.')
       } else {
         setErr(msg || 'Something went wrong.')
       }
