@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllTasks, softDeleteTask } from '../lib/tasks'
-import type { TaskWithOwner } from '../lib/types'
+import type { Profile, TaskWithOwner } from '../lib/types'
 import { formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 import TaskTable from '../components/TaskTable'
 
-export default function MyTasks({ userId }: { userId: string }) {
+export default function MyTasks({ profile }: { profile: Profile }) {
+  const userId = profile.id
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
@@ -49,7 +50,7 @@ export default function MyTasks({ userId }: { userId: string }) {
   return (
     <div className="mytasks">
       <div className="dash-toolbar">
-        <h2>My Tasks</h2>
+        <h2>My Tasks {profile.name && <span className="mytasks-who">({profile.name})</span>}</h2>
         <div className="dash-toolbar-actions">
           <button className="primary" onClick={openCreate}>New Task+</button>
           <button className="ghost" onClick={load}>Refresh</button>

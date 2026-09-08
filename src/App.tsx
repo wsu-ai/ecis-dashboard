@@ -62,7 +62,7 @@ export default function App() {
       </nav>
 
       <main className="app-main">
-        {tab === 'dashboard' ? <Dashboard profile={profile} /> : <MyTasks userId={session.user.id} />}
+        {tab === 'dashboard' ? <Dashboard profile={profile} /> : <MyTasks profile={profile} />}
       </main>
     </div>
   )
