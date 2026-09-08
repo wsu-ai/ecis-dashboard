@@ -62,6 +62,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table th,.task-table td{padding:9px 10px;border-bottom:1px solid var(--border);white-space:normal;overflow-wrap:anywhere}
 .task-table th{text-align:center}
 .task-table td{text-align:left}
+.task-table td.col-center{text-align:center}
 /* 제목 열: 조금 넓게, 줄바꿈 없이 넘치면 말줄임 (전체 제목은 hover 툴팁으로 확인) */
 .task-table th.col-title,.task-table td.col-title{width:22%}
 .task-table td.col-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -81,6 +82,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 
 /* ── 우선순위: 색 원 + 행 배경 ── */
 .task-table th.col-prio,.task-table td.col-prio{text-align:center;width:60px;white-space:nowrap}
+.task-table th.col-days,.task-table td.col-days{text-align:center;width:44px;white-space:nowrap}
 .prio-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle}
 .prio-dot.prio-high{background:#D64541}
 .prio-dot.prio-medium{background:#E8B004}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllTasks, softDeleteTask } from '../lib/tasks'
 import type { Priority, Profile, TaskWithOwner } from '../lib/types'
-import { formatDateMDY, formatDueDate, formatRefreshed } from '../lib/format'
+import { formatDateMDY, formatDueMDY, formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 
 type SortKey = 'requesting_org' | 'due_date'
@@ -24,6 +24,14 @@ function effectivePriority(t: TaskWithOwner): Priority {
 }
 
 const prioClass = (p: Priority) => `prio-${p.toLowerCase()}`
+
+// 마감일까지 남은 일수 (달력 기준). 마감일 없으면 null.
+function daysUntilDue(iso: string | null): number | null {
+  if (!iso) return null
+  const due = new Date(iso); due.setHours(0, 0, 0, 0)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  return Math.round((due.getTime() - today.getTime()) / 86_400_000)
+}
 
 export default function Dashboard({ profile }: { profile: Profile }) {
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
@@ -114,12 +122,13 @@ export default function Dashboard({ profile }: { profile: Profile }) {
             <thead>
               <tr>
                 <th className="col-prio">Priority</th>
+                <th className="col-days" title="Days remaining until the due date">⏳</th>
                 <th className="col-title">Title</th>
                 <th className="sortable" onClick={() => toggleSort('requesting_org')}>Requesting Dept.{sortArrow('requesting_org')}</th>
-                <th>Entered By</th>
-                <th>Status</th>
+                <th className="col-center">Entered By</th>
+                <th className="col-center">Status</th>
                 <th className="sortable" onClick={() => toggleSort('due_date')}>Due Date{sortArrow('due_date')}</th>
-                <th>Task Date</th>
+                <th className="col-center">Task Registered Date</th>
                 <th>Enter Date</th>
                 {showDeleted && <th>Deleted By / At</th>}
                 {!showDeleted && <th className="col-actions" aria-label="Actions" />}
@@ -127,7 +136,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
             </thead>
             <tbody>
               {visible.length === 0 && (
-                <tr><td colSpan={9} className="empty">No tasks to show.</td></tr>
+                <tr><td colSpan={10} className="empty">No tasks to show.</td></tr>
               )}
               {visible.map((t) => {
                 const ep = effectivePriority(t)
@@ -136,13 +145,14 @@ export default function Dashboard({ profile }: { profile: Profile }) {
                   className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}
                   title={t.description || undefined}>
                   <td className="col-prio"><span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} /></td>
+                  <td className="col-days">{daysUntilDue(t.due_date) ?? '-'}</td>
                   <td className="col-title">{t.title}</td>
                   <td>{t.requesting_org || '-'}</td>
-                  <td>{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
-                  <td>{t.status}</td>
-                  <td>{t.due_date ? formatDueDate(t.due_date) : 'TBD'}</td>
-                  <td>{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
-                  <td>{formatDueDate(t.created_at)}</td>
+                  <td className="col-center">{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
+                  <td className="col-center">{t.status}</td>
+                  <td>{t.due_date ? formatDueMDY(t.due_date) : 'TBD'}</td>
+                  <td className="col-center">{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
+                  <td>{formatDueMDY(t.created_at)}</td>
                   {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                   {!showDeleted && (
                     <td className="col-actions">
