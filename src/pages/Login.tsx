@@ -28,7 +28,12 @@ export default function Login() {
         setNotice('A confirmation email has been sent. Please check your inbox.')
       }
     } catch (e: any) {
-      setErr(e?.message || 'Something went wrong.')
+      const msg: string = e?.message || ''
+      if (/failed to fetch|load failed|networkerror/i.test(msg)) {
+        setErr('Login information not valid. Please check your email address and password; then try again.')
+      } else {
+        setErr(msg || 'Something went wrong.')
+      }
     } finally {
       setBusy(false)
     }
