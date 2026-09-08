@@ -6,15 +6,19 @@
 }
 *{box-sizing:border-box}
 html,body,#root{height:100%}
-body{margin:0;font-family:var(--font);color:var(--ink);background:var(--panel)}
+body{
+  margin:0;font-family:var(--font);color:var(--ink);
+  background:linear-gradient(rgba(247,246,241,.82),rgba(247,246,241,.82)),url("/ecis-background.jpg") center/cover fixed no-repeat;
+  background-color:var(--panel);
+}
 button{font-family:var(--font);touch-action:manipulation;cursor:pointer}
 h1,h2{margin:0}
 
 /* ── 로그인/프로필 설정 ── */
 .auth-screen{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
 .auth-card{width:100%;max-width:380px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:28px 24px;box-shadow:0 12px 40px rgba(40,38,30,.08)}
-.auth-card h1{font-size:20px;margin-bottom:6px}
-.auth-sub{color:var(--gray);font-size:14px;margin:0 0 20px}
+.auth-card h1{font-size:20px;margin-bottom:6px;text-align:center}
+.auth-sub{color:var(--gray);font-size:14px;margin:0 0 20px;text-align:center}
 .auth-err{color:var(--live);font-size:13px;margin:4px 0}
 .auth-notice{color:var(--teal2);font-size:13px;margin:4px 0}
 

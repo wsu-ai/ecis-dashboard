@@ -49,7 +49,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>University Task Dashboard</h1>
+        <h1>ECIS IAO Task Dashboard</h1>
         <div className="app-header-right">
           <span className="who">{profile.name} ({profile.department})</span>
           <button className="ghost" onClick={() => signOut()}>Log out</button>

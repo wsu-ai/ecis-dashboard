@@ -16,7 +16,12 @@ export default function Login() {
     try {
       if (mode === 'signin') {
         const { error } = await signIn(email.trim(), password)
-        if (error) throw error
+        if (error) {
+          if (error.status === 400 || /invalid login credentials/i.test(error.message)) {
+            throw new Error('Login information not recognized. Please check your email address and the password.')
+          }
+          throw error
+        }
       } else {
         const { error } = await signUp(email.trim(), password)
         if (error) throw error
@@ -32,7 +37,7 @@ export default function Login() {
   return (
     <div className="auth-screen">
       <div className="auth-card">
-        <h1>University Task Dashboard</h1>
+        <h1>ECIS IAO Task Dashboard</h1>
         <p className="auth-sub">{mode === 'signin' ? 'Sign In' : 'Sign Up'}</p>
 
         <label className="field">

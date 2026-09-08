@@ -12,13 +12,16 @@ create table if not exists profiles (
 alter table profiles enable row level security;
 
 -- 전체 로그인 사용자가 서로의 이름/부서를 볼 수 있어야 대시보드에 표시 가능
+drop policy if exists "profiles_select_all" on profiles;
 create policy "profiles_select_all" on profiles
   for select using (auth.role() = 'authenticated');
 
 -- 본인 프로필만 생성/수정 가능
+drop policy if exists "profiles_insert_own" on profiles;
 create policy "profiles_insert_own" on profiles
   for insert with check (auth.uid() = id);
 
+drop policy if exists "profiles_update_own" on profiles;
 create policy "profiles_update_own" on profiles
   for update using (auth.uid() = id) with check (auth.uid() = id);
 
@@ -57,14 +60,17 @@ create index if not exists tasks_owner_id_idx on tasks (owner_id);
 alter table tasks enable row level security;
 
 -- 대시보드는 전체 업무(삭제된 것 포함)를 모두 볼 수 있어야 함 — 조회는 전체 개방
+drop policy if exists "tasks_select_all" on tasks;
 create policy "tasks_select_all" on tasks
   for select using (auth.role() = 'authenticated');
 
 -- 등록은 본인 명의로만
+drop policy if exists "tasks_insert_own" on tasks;
 create policy "tasks_insert_own" on tasks
   for insert with check (auth.uid() = owner_id);
 
 -- 수정(소프트 삭제 포함)은 본인 업무만
+drop policy if exists "tasks_update_own" on tasks;
 create policy "tasks_update_own" on tasks
   for update using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
 
