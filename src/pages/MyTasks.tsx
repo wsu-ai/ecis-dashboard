@@ -67,6 +67,9 @@ export default function MyTasks({ userId }: { userId: string }) {
                 {t.requesting_org && <>Requesting dept.: {t.requesting_org} · </>}
                 Due: {t.due_date ? formatDueDate(t.due_date) : 'TBD'} · Priority: {t.priority}
               </p>
+              <p className="task-card-meta">
+                Task date: {t.task_date || '-'} · Enter date: {formatDueDate(t.created_at)}
+              </p>
               {t.description && <p className="task-card-desc">{t.description}</p>}
               <div className="task-card-actions">
                 <button className="ghost" onClick={() => openEdit(t)}>Edit</button>

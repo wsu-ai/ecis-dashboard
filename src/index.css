@@ -58,12 +58,19 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .dash-tabs button.on{background:var(--teal);color:#fff}
 .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:12px}
 .task-table{width:100%;border-collapse:collapse;font-size:14px}
-.task-table th,.task-table td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
-.task-table th{color:var(--gray);font-weight:600;font-size:13px;background:var(--panel)}
+.task-table th,.task-table td{padding:11px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+.task-table th{text-align:center}
+.task-table td{text-align:left}
+.task-table th{color:var(--ink);font-weight:700;font-size:13px;background:var(--panel)}
 .task-table th.sortable{cursor:pointer;user-select:none}
 .task-table tbody tr:last-child td{border-bottom:none}
 .task-table tr.overdue td{color:var(--live);font-weight:600}
 .task-table td.empty{color:var(--faint);text-align:center;padding:28px}
+
+/* ── 행 끝 삭제(휴지통) 버튼 ── */
+.task-table th.col-trash,.task-table td.col-trash{width:44px;padding-left:6px;text-align:center}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:none;background:none;border-radius:7px;color:var(--gray)}
+.icon-btn:hover{background:rgba(200,69,59,.12);color:var(--live)}
 
 /* ── 우선순위: 색 원 + 행 배경 ── */
 .task-table th.col-prio,.task-table td.col-prio{text-align:center;width:72px}

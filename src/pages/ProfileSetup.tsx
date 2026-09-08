@@ -15,7 +15,7 @@ export default function ProfileSetup({ userId, onDone }: { userId: string; onDon
     setBusy(true)
     try {
       await createMyProfile(userId, name.trim(), department.trim(), role)
-      onDone({ id: userId, name: name.trim(), department: department.trim(), role, created_at: new Date().toISOString() })
+      onDone({ id: userId, name: name.trim(), department: department.trim(), role, is_admin: false, created_at: new Date().toISOString() })
     } catch (e: any) {
       setErr(e?.message || 'Something went wrong.')
     } finally {

@@ -7,6 +7,7 @@ export type Profile = {
   name: string
   department: string
   role: Role
+  is_admin: boolean
   created_at: string
 }
 
@@ -22,6 +23,7 @@ export type Task = {
   required_documents: string | null
   status: Status
   priority: Priority
+  task_date: string | null // YYYY-MM-DD (date)
   due_date: string | null // ISO timestamp (timestamptz)
   deleted_at: string | null
   deleted_by: string | null

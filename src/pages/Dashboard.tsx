@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchAllTasks } from '../lib/tasks'
-import type { Priority, TaskWithOwner } from '../lib/types'
+import { fetchAllTasks, softDeleteTask } from '../lib/tasks'
+import type { Priority, Profile, TaskWithOwner } from '../lib/types'
 import { formatDueDate } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 
@@ -25,7 +25,7 @@ function effectivePriority(t: TaskWithOwner): Priority {
 
 const prioClass = (p: Priority) => `prio-${p.toLowerCase()}`
 
-export default function Dashboard({ userId }: { userId: string }) {
+export default function Dashboard({ profile }: { profile: Profile }) {
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
@@ -69,6 +69,19 @@ export default function Dashboard({ userId }: { userId: string }) {
 
   const sortArrow = (key: SortKey) => sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''
 
+  // 본인이 등록한 업무이거나 관리자면 삭제 가능
+  const canDelete = (t: TaskWithOwner) => t.owner_id === profile.id || profile.is_admin
+
+  async function remove(t: TaskWithOwner) {
+    if (!confirm(`Delete "${t.title}"? (It is kept as a record and stays visible under "Deleted Tasks".)`)) return
+    try {
+      await softDeleteTask(t.id, profile.id)
+      await load()
+    } catch (e: any) {
+      alert(e?.message || 'Failed to delete.')
+    }
+  }
+
   return (
     <div className="dash">
       <div className="dash-toolbar">
@@ -96,12 +109,15 @@ export default function Dashboard({ userId }: { userId: string }) {
                 <th>Entered By</th>
                 <th>Status</th>
                 <th className="sortable" onClick={() => toggleSort('due_date')}>Due Date{sortArrow('due_date')}</th>
+                <th>Task Date</th>
+                <th>Enter Date</th>
                 {showDeleted && <th>Deleted By / At</th>}
+                {!showDeleted && <th className="col-trash" aria-label="Delete" />}
               </tr>
             </thead>
             <tbody>
               {visible.length === 0 && (
-                <tr><td colSpan={showDeleted ? 7 : 6} className="empty">No tasks to show.</td></tr>
+                <tr><td colSpan={9} className="empty">No tasks to show.</td></tr>
               )}
               {visible.map((t) => {
                 const ep = effectivePriority(t)
@@ -113,7 +129,20 @@ export default function Dashboard({ userId }: { userId: string }) {
                   <td>{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                   <td>{t.status}</td>
                   <td>{t.due_date ? formatDueDate(t.due_date) : 'TBD'}</td>
+                  <td>{t.task_date || '-'}</td>
+                  <td>{formatDueDate(t.created_at)}</td>
                   {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
+                  {!showDeleted && (
+                    <td className="col-trash">
+                      {canDelete(t) && (
+                        <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => remove(t)}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
+                          </svg>
+                        </button>
+                      )}
+                    </td>
+                  )}
                 </tr>
                 )
               })}
@@ -124,7 +153,7 @@ export default function Dashboard({ userId }: { userId: string }) {
 
       {modalOpen && (
         <TaskFormModal
-          userId={userId}
+          userId={profile.id}
           task={null}
           onClose={() => setModalOpen(false)}
           onSaved={load}

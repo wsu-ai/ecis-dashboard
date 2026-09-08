@@ -6,6 +6,7 @@ create table if not exists profiles (
   name text not null default '',
   department text not null default '',
   role text not null default 'Staff' check (role in ('Faculty', 'Assistant', 'Staff')),
+  is_admin boolean not null default false,   -- 관리자: 누구의 업무든 삭제 가능
   created_at timestamptz not null default now()
 );
 
@@ -43,13 +44,14 @@ create table if not exists tasks (
 
   status text not null default 'Received' check (status in ('Received', 'In Progress', 'Completed', 'On Hold')),
   priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High')),
+  task_date date,        -- 업무 일자 (사용자가 등록 시 입력)
   due_date timestamptz,   -- 마감 일시
 
   -- 소프트 삭제: 실제 DELETE는 RLS로 막고, 이 두 컬럼만 채워서 "삭제 처리"한다.
   deleted_at timestamptz,
   deleted_by uuid references profiles(id),
 
-  created_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),   -- 등록 일시 ("Enter Date")
   updated_at timestamptz not null default now()
 );
 
@@ -73,6 +75,13 @@ create policy "tasks_insert_own" on tasks
 drop policy if exists "tasks_update_own" on tasks;
 create policy "tasks_update_own" on tasks
   for update using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+
+-- 관리자(is_admin)는 누구의 업무든 수정/소프트 삭제 가능 (본인 정책과 OR로 합쳐짐)
+drop policy if exists "tasks_update_admin" on tasks;
+create policy "tasks_update_admin" on tasks
+  for update
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin))
+  with check (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin));
 
 -- DELETE 정책을 아예 만들지 않음 = RLS 기본값(전체 거부)으로 실제 삭제 완전 차단
 

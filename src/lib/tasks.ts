@@ -37,6 +37,7 @@ export type TaskInput = {
   required_documents: string
   status: Task['status']
   priority: Task['priority']
+  task_date: string // "YYYY-MM-DD", '' 허용(미정)
   due_date: string // datetime-local 값 "YYYY-MM-DDTHH:MM", '' 허용(미정)
 }
 
@@ -51,6 +52,7 @@ export async function createTask(ownerId: string, input: TaskInput) {
   const { error } = await supabase.from('tasks').insert({
     owner_id: ownerId,
     ...input,
+    task_date: input.task_date || null,
     due_date: dueToIso(input.due_date),
   })
   if (error) throw error
@@ -59,7 +61,7 @@ export async function createTask(ownerId: string, input: TaskInput) {
 export async function updateTask(id: string, input: TaskInput) {
   const { error } = await supabase
     .from('tasks')
-    .update({ ...input, due_date: dueToIso(input.due_date) })
+    .update({ ...input, task_date: input.task_date || null, due_date: dueToIso(input.due_date) })
     .eq('id', id)
   if (error) throw error
 }

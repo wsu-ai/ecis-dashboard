@@ -10,9 +10,9 @@ export function formatDueDate(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(h)}:${pad(d.getMinutes())} ${ampm}`
 }
 
-// ISO 타임스탬프 → <input type="datetime-local"> 이 요구하는 "YYYY-MM-DDTHH:MM" (로컬 시간)
+// ISO 타임스탬프 → <input type="datetime-local" step="1"> 이 요구하는 "YYYY-MM-DDTHH:MM:SS" (로컬 시간)
 export function toDateTimeLocalValue(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }

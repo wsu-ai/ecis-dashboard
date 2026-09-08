@@ -3,10 +3,22 @@ import { createTask, updateTask, type TaskInput } from '../lib/tasks'
 import type { Task } from '../lib/types'
 import { toDateTimeLocalValue } from '../lib/format'
 
-const emptyInput: TaskInput = {
-  title: '', description: '', requesting_org: '', requesting_org_id: '',
-  submission_method: '', contact_info: '', required_documents: '',
-  status: 'Received', priority: 'Medium', due_date: '',
+const pad2 = (n: number) => String(n).padStart(2, '0')
+const todayDate = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+}
+
+// 새 업무의 기본 마감 일시: 오늘 23:59:59
+const defaultDueDate = () => `${todayDate()}T23:59:59`
+
+function newInput(): TaskInput {
+  return {
+    title: '', description: '', requesting_org: '', requesting_org_id: '',
+    submission_method: '', contact_info: '', required_documents: '',
+    status: 'Received', priority: 'Medium',
+    task_date: todayDate(), due_date: defaultDueDate(),
+  }
 }
 
 function inputFromTask(t: Task): TaskInput {
@@ -16,6 +28,7 @@ function inputFromTask(t: Task): TaskInput {
     submission_method: t.submission_method ?? '', contact_info: t.contact_info ?? '',
     required_documents: t.required_documents ?? '',
     status: t.status, priority: t.priority,
+    task_date: t.task_date ?? '',
     due_date: t.due_date ? toDateTimeLocalValue(t.due_date) : '',
   }
 }
@@ -28,7 +41,7 @@ export default function TaskFormModal({
   onClose: () => void
   onSaved: () => void | Promise<void>
 }) {
-  const [input, setInput] = useState<TaskInput>(task ? inputFromTask(task) : emptyInput)
+  const [input, setInput] = useState<TaskInput>(task ? inputFromTask(task) : newInput())
   const [saving, setSaving] = useState(false)
 
   async function save() {
@@ -102,9 +115,16 @@ export default function TaskFormModal({
               <option value="High">High</option>
             </select>
           </label>
+        </div>
+
+        <div className="field-row">
+          <label className="field">
+            <span>Task Date</span>
+            <input type="date" value={input.task_date} onChange={(e) => setInput({ ...input, task_date: e.target.value })} />
+          </label>
           <label className="field">
             <span>Due Date &amp; Time</span>
-            <input type="datetime-local" value={input.due_date} onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
+            <input type="datetime-local" step="1" value={input.due_date} onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
           </label>
         </div>
 
