@@ -4,10 +4,8 @@ import type { Priority, Profile, TaskWithOwner } from '../lib/types'
 import { formatDateMDY, formatDueMDY, formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 
-type SortKey = 'requesting_org' | 'due_date'
-type SortDir = 'asc' | 'desc'
-
 const WEEK_MS = 7 * 86_400_000
+const PRIO_RANK: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 }
 
 function isOverdue(t: TaskWithOwner): boolean {
   return !!t.due_date && new Date(t.due_date).getTime() < Date.now()
@@ -37,8 +35,6 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
-  const [sortKey, setSortKey] = useState<SortKey>('due_date')
-  const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [showDeleted, setShowDeleted] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<TaskWithOwner | null>(null)
@@ -58,27 +54,20 @@ export default function Dashboard({ profile }: { profile: Profile }) {
 
   useEffect(() => { load() }, [])
 
-  function toggleSort(key: SortKey) {
-    if (sortKey === key) setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
-    else { setSortKey(key); setSortDir('asc') }
-  }
-
+  // 정렬: 1) 우선순위 High→Medium→Low, 2) 마감일이 오늘과 가까운 순(마감일 없으면 맨 뒤)
   const visible = useMemo(() => {
     const filtered = tasks.filter((t) => showDeleted ? !!t.deleted_at : !t.deleted_at)
-    const sorted = [...filtered].sort((a, b) => {
-      const av = (a[sortKey] ?? '') as string
-      const bv = (b[sortKey] ?? '') as string
-      // 값이 없는(미정) 항목은 항상 맨 뒤로
-      if (!av && !bv) return 0
-      if (!av) return 1
-      if (!bv) return -1
-      const cmp = av < bv ? -1 : av > bv ? 1 : 0
-      return sortDir === 'asc' ? cmp : -cmp
+    return [...filtered].sort((a, b) => {
+      const pr = PRIO_RANK[effectivePriority(a)] - PRIO_RANK[effectivePriority(b)]
+      if (pr !== 0) return pr
+      const da = daysUntilDue(a.due_date)
+      const db = daysUntilDue(b.due_date)
+      if (da === null && db === null) return 0
+      if (da === null) return 1
+      if (db === null) return -1
+      return Math.abs(da) - Math.abs(db)
     })
-    return sorted
-  }, [tasks, sortKey, sortDir, showDeleted])
-
-  const sortArrow = (key: SortKey) => sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''
+  }, [tasks, showDeleted])
 
   // 본인이 등록한 업무이거나 관리자면 수정/삭제 가능
   const canModify = (t: TaskWithOwner) => t.owner_id === profile.id || profile.is_admin
@@ -123,11 +112,11 @@ export default function Dashboard({ profile }: { profile: Profile }) {
               <tr>
                 <th className="col-prio">Priority</th>
                 <th className="col-days" title="Days remaining until the due date">⏳</th>
-                <th className="col-title">Title</th>
-                <th className="sortable" onClick={() => toggleSort('requesting_org')}>Requesting Dept.{sortArrow('requesting_org')}</th>
+                <th className="col-title">Task Title</th>
+                <th>Requesting Dept.</th>
                 <th className="col-center">Entered By</th>
                 <th className="col-center">Status</th>
-                <th className="sortable" onClick={() => toggleSort('due_date')}>Due Date{sortArrow('due_date')}</th>
+                <th>Due Date</th>
                 <th className="col-center">Task Registered Date</th>
                 <th>Enter Date</th>
                 {showDeleted && <th>Deleted By / At</th>}
