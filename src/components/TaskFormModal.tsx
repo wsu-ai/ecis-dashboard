@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { createTask, updateTask, type TaskInput } from '../lib/tasks'
+import { createTask, updateTask, isDueInputValid, type TaskInput } from '../lib/tasks'
 import type { Task } from '../lib/types'
-import { toDateTimeLocalValue } from '../lib/format'
+import { formatDueDate } from '../lib/format'
+
+const DUE_FORMAT = 'YYYY-MM-DD HH:MM AM'
 
 const pad2 = (n: number) => String(n).padStart(2, '0')
 const todayDate = () => {
@@ -9,8 +11,8 @@ const todayDate = () => {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 }
 
-// 새 업무의 기본 마감 일시: 오늘 23:59:59
-const defaultDueDate = () => `${todayDate()}T23:59:59`
+// 새 업무의 기본 마감 일시: 오늘 11:59 PM
+const defaultDueDate = () => `${todayDate()} 11:59 PM`
 
 function newInput(): TaskInput {
   return {
@@ -29,7 +31,7 @@ function inputFromTask(t: Task): TaskInput {
     required_documents: t.required_documents ?? '',
     status: t.status, priority: t.priority,
     task_date: t.task_date ?? '',
-    due_date: t.due_date ? toDateTimeLocalValue(t.due_date) : '',
+    due_date: t.due_date ? formatDueDate(t.due_date) : '',
   }
 }
 
@@ -46,6 +48,10 @@ export default function TaskFormModal({
 
   async function save() {
     if (!input.title.trim()) return
+    if (!isDueInputValid(input.due_date)) {
+      alert(`Due Date & Time must be in the format "${DUE_FORMAT}" (e.g. 2026-09-08 11:59 PM).`)
+      return
+    }
     setSaving(true)
     try {
       if (task) await updateTask(task.id, input)
@@ -124,7 +130,8 @@ export default function TaskFormModal({
           </label>
           <label className="field">
             <span>Due Date &amp; Time</span>
-            <input type="datetime-local" step="1" value={input.due_date} onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
+            <input type="text" placeholder={DUE_FORMAT} value={input.due_date}
+              onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
           </label>
         </div>
 

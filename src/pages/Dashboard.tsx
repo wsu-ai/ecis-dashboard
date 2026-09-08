@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllTasks, softDeleteTask } from '../lib/tasks'
 import type { Priority, Profile, TaskWithOwner } from '../lib/types'
-import { formatDueDate } from '../lib/format'
+import { formatDateMDY, formatDueDate, formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 
 type SortKey = 'requesting_org' | 'due_date'
@@ -34,11 +34,13 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   const [showDeleted, setShowDeleted] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<TaskWithOwner | null>(null)
+  const [refreshedAt, setRefreshedAt] = useState<Date | null>(null)
 
   async function load() {
     setLoading(true); setErr('')
     try {
       setTasks(await fetchAllTasks())
+      setRefreshedAt(new Date())
     } catch (e: any) {
       setErr(e?.message || 'Failed to load the task list.')
     } finally {
@@ -99,6 +101,10 @@ export default function Dashboard({ profile }: { profile: Profile }) {
         </div>
       </div>
 
+      {refreshedAt && (
+        <p className="dash-refreshed">Last Refreshed at {formatRefreshed(refreshedAt)}</p>
+      )}
+
       {loading && <p className="hint">Loading…</p>}
       {err && <p className="hint err">{err}</p>}
 
@@ -130,12 +136,12 @@ export default function Dashboard({ profile }: { profile: Profile }) {
                   className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}
                   title={t.description || undefined}>
                   <td className="col-prio"><span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} /></td>
-                  <td className="col-title" title={t.title}>{t.title}</td>
+                  <td className="col-title">{t.title}</td>
                   <td>{t.requesting_org || '-'}</td>
                   <td>{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                   <td>{t.status}</td>
                   <td>{t.due_date ? formatDueDate(t.due_date) : 'TBD'}</td>
-                  <td>{t.task_date || '-'}</td>
+                  <td>{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
                   <td>{formatDueDate(t.created_at)}</td>
                   {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                   {!showDeleted && (

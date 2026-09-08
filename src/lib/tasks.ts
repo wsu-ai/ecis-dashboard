@@ -38,14 +38,26 @@ export type TaskInput = {
   status: Task['status']
   priority: Task['priority']
   task_date: string // "YYYY-MM-DD", '' 허용(미정)
-  due_date: string // datetime-local 값 "YYYY-MM-DDTHH:MM", '' 허용(미정)
+  due_date: string // "YYYY-MM-DD HH:MM AM" (로컬 시간), '' 허용(미정)
 }
 
-// datetime-local(로컬 시간) → timestamptz용 ISO 문자열
-function dueToIso(v: string): string | null {
-  if (!v) return null
-  const d = new Date(v)
-  return Number.isNaN(d.getTime()) ? null : d.toISOString()
+// "YYYY-MM-DD HH:MM AM" (로컬 시간) → timestamptz용 ISO 문자열.
+// 형식이 맞지 않으면 null (미입력과 동일 취급 — 호출부에서 미리 검증한다).
+export function parseDueInput(v: string): string | null {
+  const s = v.trim()
+  if (!s) return null
+  const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/)
+  if (!m) return null
+  const [, y, mo, d, h, mi, ap] = m
+  let hour = parseInt(h, 10) % 12
+  if (ap.toLowerCase() === 'pm') hour += 12
+  const dt = new Date(Number(y), Number(mo) - 1, Number(d), hour, Number(mi))
+  return Number.isNaN(dt.getTime()) ? null : dt.toISOString()
+}
+
+// 입력값이 비었거나 형식이 유효하면 true
+export function isDueInputValid(v: string): boolean {
+  return !v.trim() || parseDueInput(v) !== null
 }
 
 export async function createTask(ownerId: string, input: TaskInput) {
@@ -53,7 +65,7 @@ export async function createTask(ownerId: string, input: TaskInput) {
     owner_id: ownerId,
     ...input,
     task_date: input.task_date || null,
-    due_date: dueToIso(input.due_date),
+    due_date: parseDueInput(input.due_date),
   })
   if (error) throw error
 }
@@ -61,7 +73,7 @@ export async function createTask(ownerId: string, input: TaskInput) {
 export async function updateTask(id: string, input: TaskInput) {
   const { error } = await supabase
     .from('tasks')
-    .update({ ...input, task_date: input.task_date || null, due_date: dueToIso(input.due_date) })
+    .update({ ...input, task_date: input.task_date || null, due_date: parseDueInput(input.due_date) })
     .eq('id', id)
   if (error) throw error
 }
