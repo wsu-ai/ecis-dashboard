@@ -15,18 +15,6 @@ export async function fetchAllTasks(): Promise<TaskWithOwner[]> {
   }))
 }
 
-// 내 업무: 본인이 등록한 것 + 삭제되지 않은 것
-export async function fetchMyTasks(userId: string): Promise<Task[]> {
-  const { data, error } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('owner_id', userId)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data ?? []
-}
-
 export type TaskInput = {
   title: string
   description: string

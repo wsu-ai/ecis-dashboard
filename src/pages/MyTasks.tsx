@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react'
-import { fetchMyTasks, softDeleteTask } from '../lib/tasks'
-import type { Task } from '../lib/types'
-import { formatDueDate } from '../lib/format'
+import { useEffect, useMemo, useState } from 'react'
+import { fetchAllTasks, softDeleteTask } from '../lib/tasks'
+import type { TaskWithOwner } from '../lib/types'
+import { formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
-
-const statusSlug = (status: string) => status.toLowerCase().replace(/\s+/g, '-')
+import TaskTable from '../components/TaskTable'
 
 export default function MyTasks({ userId }: { userId: string }) {
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [tasks, setTasks] = useState<TaskWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
-
   const [modalOpen, setModalOpen] = useState(false)
-  const [editing, setEditing] = useState<Task | null>(null)
+  const [editing, setEditing] = useState<TaskWithOwner | null>(null)
+  const [refreshedAt, setRefreshedAt] = useState<Date | null>(null)
 
   async function load() {
     setLoading(true); setErr('')
     try {
-      setTasks(await fetchMyTasks(userId))
+      setTasks(await fetchAllTasks())
+      setRefreshedAt(new Date())
     } catch (e: any) {
       setErr(e?.message || 'Failed to load the task list.')
     } finally {
@@ -27,15 +27,17 @@ export default function MyTasks({ userId }: { userId: string }) {
 
   useEffect(() => { load() }, [userId])
 
-  function openCreate() {
-    setEditing(null); setModalOpen(true)
-  }
-  function openEdit(t: Task) {
-    setEditing(t); setModalOpen(true)
-  }
+  // 내가 등록한, 삭제되지 않은 업무만
+  const mine = useMemo(
+    () => tasks.filter((t) => t.owner_id === userId && !t.deleted_at),
+    [tasks, userId],
+  )
 
-  async function remove(t: Task) {
-    if (!confirm(`Delete "${t.title}"? (This is kept as a record and stays visible on the dashboard.)`)) return
+  function openCreate() { setEditing(null); setModalOpen(true) }
+  function openEdit(t: TaskWithOwner) { setEditing(t); setModalOpen(true) }
+
+  async function remove(t: TaskWithOwner) {
+    if (!confirm(`Delete "${t.title}"? (It is kept as a record and stays visible on the dashboard.)`)) return
     try {
       await softDeleteTask(t.id, userId)
       await load()
@@ -48,43 +50,35 @@ export default function MyTasks({ userId }: { userId: string }) {
     <div className="mytasks">
       <div className="dash-toolbar">
         <h2>My Tasks</h2>
-        <button className="primary" onClick={openCreate}>+ New Task</button>
+        <div className="dash-toolbar-actions">
+          <button className="primary" onClick={openCreate}>New Task+</button>
+          <button className="ghost" onClick={load}>Refresh</button>
+        </div>
       </div>
+
+      {refreshedAt && (
+        <p className="dash-refreshed">Last Refreshed at {formatRefreshed(refreshedAt)}</p>
+      )}
 
       {loading && <p className="hint">Loading…</p>}
       {err && <p className="hint err">{err}</p>}
 
       {!loading && !err && (
-        <div className="card-list">
-          {tasks.length === 0 && <p className="hint">No tasks registered yet.</p>}
-          {tasks.map((t) => (
-            <div className="task-card" key={t.id}>
-              <div className="task-card-head">
-                <b>{t.title}</b>
-                <span className={`badge status-${statusSlug(t.status)}`}>{t.status}</span>
-              </div>
-              <p className="task-card-meta">
-                {t.requesting_org && <>Requesting dept.: {t.requesting_org} · </>}
-                Due: {t.due_date ? formatDueDate(t.due_date) : 'TBD'} · Priority: {t.priority}
-              </p>
-              <p className="task-card-meta">
-                Task date: {t.task_date || '-'} · Enter date: {formatDueDate(t.created_at)}
-              </p>
-              {t.description && <p className="task-card-desc">{t.description}</p>}
-              <div className="task-card-actions">
-                <button className="ghost" onClick={() => openEdit(t)}>Edit</button>
-                <button className="ghost danger" onClick={() => remove(t)}>Delete</button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <TaskTable
+          rows={mine}
+          showDeleted={false}
+          hideOwner
+          canModify={() => true}
+          onEdit={openEdit}
+          onDelete={remove}
+        />
       )}
 
       {modalOpen && (
         <TaskFormModal
           userId={userId}
           task={editing}
-          onClose={() => setModalOpen(false)}
+          onClose={() => { setModalOpen(false); setEditing(null) }}
           onSaved={load}
         />
       )}
