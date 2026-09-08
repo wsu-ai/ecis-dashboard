@@ -48,7 +48,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .app-tabs{display:flex;gap:4px;padding:10px 22px 0;background:#fff;border-bottom:1px solid var(--border)}
 .app-tabs button{border:none;background:none;padding:10px 16px;font-size:14px;font-weight:600;color:var(--gray);border-bottom:2px solid transparent}
 .app-tabs button.on{color:var(--teal);border-bottom-color:var(--teal)}
-.app-main{flex:1;padding:22px;max-width:1100px;width:100%;margin:0 auto}
+.app-main{flex:1;padding:22px;max-width:1400px;width:100%;margin:0 auto}
 
 /* ── 대시보드 ── */
 .dash-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px}
@@ -57,23 +57,29 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .dash-tabs button{border:none;background:transparent;padding:8px 14px;border-radius:7px;font-size:13px;font-weight:600;color:var(--gray)}
 .dash-tabs button.on{background:var(--teal);color:#fff}
 .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:12px}
-.task-table{width:100%;border-collapse:collapse;font-size:14px}
-.task-table th,.task-table td{padding:11px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+.task-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.task-table th,.task-table td{padding:9px 10px;border-bottom:1px solid var(--border);white-space:normal;overflow-wrap:anywhere}
 .task-table th{text-align:center}
 .task-table td{text-align:left}
+/* 제목 열: 조금 넓게, 줄바꿈 없이 넘치면 말줄임 (전체 제목은 hover 툴팁으로 확인) */
+.task-table th.col-title,.task-table td.col-title{width:22%}
+.task-table td.col-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-table tbody tr{cursor:default}
 .task-table th{color:var(--ink);font-weight:700;font-size:13px;background:var(--panel)}
 .task-table th.sortable{cursor:pointer;user-select:none}
 .task-table tbody tr:last-child td{border-bottom:none}
 .task-table tr.overdue td{color:var(--live);font-weight:600}
 .task-table td.empty{color:var(--faint);text-align:center;padding:28px}
 
-/* ── 행 끝 삭제(휴지통) 버튼 ── */
-.task-table th.col-trash,.task-table td.col-trash{width:44px;padding-left:6px;text-align:center}
+/* ── 행 끝 수정/삭제 아이콘 버튼 ── */
+.task-table th.col-actions,.task-table td.col-actions{width:78px;padding-left:6px;text-align:center;white-space:nowrap}
+.row-actions{display:inline-flex;gap:2px}
 .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:none;background:none;border-radius:7px;color:var(--gray)}
-.icon-btn:hover{background:rgba(200,69,59,.12);color:var(--live)}
+.icon-btn:hover{background:var(--panel);color:var(--ink)}
+.icon-btn[aria-label="Delete task"]:hover{background:rgba(200,69,59,.12);color:var(--live)}
 
 /* ── 우선순위: 색 원 + 행 배경 ── */
-.task-table th.col-prio,.task-table td.col-prio{text-align:center;width:72px}
+.task-table th.col-prio,.task-table td.col-prio{text-align:center;width:60px;white-space:nowrap}
 .prio-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle}
 .prio-dot.prio-high{background:#D64541}
 .prio-dot.prio-medium{background:#E8B004}

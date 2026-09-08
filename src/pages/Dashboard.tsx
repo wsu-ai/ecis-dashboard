@@ -33,6 +33,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [showDeleted, setShowDeleted] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<TaskWithOwner | null>(null)
 
   async function load() {
     setLoading(true); setErr('')
@@ -69,8 +70,11 @@ export default function Dashboard({ profile }: { profile: Profile }) {
 
   const sortArrow = (key: SortKey) => sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''
 
-  // 본인이 등록한 업무이거나 관리자면 삭제 가능
-  const canDelete = (t: TaskWithOwner) => t.owner_id === profile.id || profile.is_admin
+  // 본인이 등록한 업무이거나 관리자면 수정/삭제 가능
+  const canModify = (t: TaskWithOwner) => t.owner_id === profile.id || profile.is_admin
+
+  function openCreate() { setEditing(null); setModalOpen(true) }
+  function openEdit(t: TaskWithOwner) { setEditing(t); setModalOpen(true) }
 
   async function remove(t: TaskWithOwner) {
     if (!confirm(`Delete "${t.title}"? (It is kept as a record and stays visible under "Deleted Tasks".)`)) return
@@ -90,7 +94,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
           <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
         </div>
         <div className="dash-toolbar-actions">
-          <button className="primary" onClick={() => setModalOpen(true)}>New Task+</button>
+          <button className="primary" onClick={openCreate}>New Task+</button>
           <button className="ghost" onClick={load}>Refresh</button>
         </div>
       </div>
@@ -104,7 +108,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
             <thead>
               <tr>
                 <th className="col-prio">Priority</th>
-                <th>Title</th>
+                <th className="col-title">Title</th>
                 <th className="sortable" onClick={() => toggleSort('requesting_org')}>Requesting Dept.{sortArrow('requesting_org')}</th>
                 <th>Entered By</th>
                 <th>Status</th>
@@ -112,7 +116,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
                 <th>Task Date</th>
                 <th>Enter Date</th>
                 {showDeleted && <th>Deleted By / At</th>}
-                {!showDeleted && <th className="col-trash" aria-label="Delete" />}
+                {!showDeleted && <th className="col-actions" aria-label="Actions" />}
               </tr>
             </thead>
             <tbody>
@@ -122,9 +126,11 @@ export default function Dashboard({ profile }: { profile: Profile }) {
               {visible.map((t) => {
                 const ep = effectivePriority(t)
                 return (
-                <tr key={t.id} className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}>
+                <tr key={t.id}
+                  className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}
+                  title={t.description || undefined}>
                   <td className="col-prio"><span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} /></td>
-                  <td>{t.title}</td>
+                  <td className="col-title" title={t.title}>{t.title}</td>
                   <td>{t.requesting_org || '-'}</td>
                   <td>{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                   <td>{t.status}</td>
@@ -133,13 +139,20 @@ export default function Dashboard({ profile }: { profile: Profile }) {
                   <td>{formatDueDate(t.created_at)}</td>
                   {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                   {!showDeleted && (
-                    <td className="col-trash">
-                      {canDelete(t) && (
-                        <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => remove(t)}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
-                          </svg>
-                        </button>
+                    <td className="col-actions">
+                      {canModify(t) && (
+                        <div className="row-actions">
+                          <button className="icon-btn" title="Edit task" aria-label="Edit task" onClick={() => openEdit(t)}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                            </svg>
+                          </button>
+                          <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => remove(t)}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
+                            </svg>
+                          </button>
+                        </div>
                       )}
                     </td>
                   )}
@@ -154,8 +167,8 @@ export default function Dashboard({ profile }: { profile: Profile }) {
       {modalOpen && (
         <TaskFormModal
           userId={profile.id}
-          task={null}
-          onClose={() => setModalOpen(false)}
+          task={editing}
+          onClose={() => { setModalOpen(false); setEditing(null) }}
           onSaved={load}
         />
       )}
