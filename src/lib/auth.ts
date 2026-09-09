@@ -14,9 +14,10 @@ export async function signOut() {
 }
 
 // 비밀번호 재설정 메일 발송 — 메일의 링크는 앱으로 돌아오며 PASSWORD_RECOVERY 세션을 만든다.
+// redirectTo 는 Supabase Auth 의 "Redirect URLs" 허용목록에 있어야 적용된다.
 export async function sendPasswordReset(email: string) {
   return supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + window.location.pathname,
+    redirectTo: window.location.origin,
   })
 }
 
