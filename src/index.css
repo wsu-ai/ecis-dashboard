@@ -14,8 +14,12 @@ body{
 button{font-family:var(--font);touch-action:manipulation;cursor:pointer}
 h1,h2{margin:0}
 
+/* ── 상단 좌측 로고 ── */
+.brandmark{display:block;height:40px;width:auto}
+
 /* ── 로그인/프로필 설정 ── */
-.auth-screen{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-screen{position:relative;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-screen .brandmark{position:absolute;top:20px;left:24px;height:36px}
 .auth-card{width:100%;max-width:380px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:28px 24px;box-shadow:0 12px 40px rgba(40,38,30,.08)}
 .auth-card h1{font-size:20px;margin-bottom:6px;text-align:center}
 .auth-sub{color:var(--gray);font-size:14px;margin:0 0 20px;text-align:center}
@@ -43,8 +47,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 
 /* ── 앱 셸 ── */
 .app-shell{min-height:100dvh;display:flex;flex-direction:column}
-.app-header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#fff;border-bottom:1px solid var(--border)}
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:#fff;border-bottom:1px solid var(--border);gap:14px;flex-wrap:wrap}
+.app-header-left{display:flex;align-items:center;gap:14px;min-width:0}
 .app-header h1{font-size:17px}
+.app-header .brandmark{height:30px}
 .app-header-right{display:flex;align-items:center;gap:14px}
 .who{font-size:13px;color:var(--gray)}
 .app-tabs{display:flex;gap:4px;padding:10px 22px 0;background:#fff;border-bottom:1px solid var(--border)}

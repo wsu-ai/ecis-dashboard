@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { sendPasswordReset } from '../lib/auth'
+import BrandMark from '../components/BrandMark'
 
 export default function ForgotPassword({ onBack }: { onBack: () => void }) {
   const [email, setEmail] = useState('')
@@ -34,6 +35,7 @@ export default function ForgotPassword({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="auth-screen">
+      <BrandMark />
       <div className="auth-card">
         <h1>Reset Password</h1>
 

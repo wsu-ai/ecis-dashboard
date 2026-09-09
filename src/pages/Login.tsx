@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { signIn, signUp } from '../lib/auth'
 import ForgotPassword from './ForgotPassword'
+import BrandMark from '../components/BrandMark'
 
 export default function Login() {
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
@@ -50,6 +51,7 @@ export default function Login() {
 
   return (
     <div className="auth-screen">
+      <BrandMark />
       <div className="auth-card">
         <h1>ECIS IAO Task Dashboard</h1>
         <p className="auth-sub">{mode === 'signin' ? 'Sign In' : 'Sign Up'}</p>

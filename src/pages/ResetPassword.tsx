@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { updatePassword } from '../lib/auth'
+import BrandMark from '../components/BrandMark'
 
 export default function ResetPassword({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('')
@@ -32,6 +33,7 @@ export default function ResetPassword({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="auth-screen">
+      <BrandMark />
       <div className="auth-card">
         <h1>Set a New Password</h1>
 

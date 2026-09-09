@@ -8,6 +8,7 @@ import ProfileSetup from './pages/ProfileSetup'
 import Dashboard from './pages/Dashboard'
 import MyTasks from './pages/MyTasks'
 import ResetPassword from './pages/ResetPassword'
+import BrandMark from './components/BrandMark'
 
 type Tab = 'dashboard' | 'mytasks'
 
@@ -41,6 +42,7 @@ export default function App() {
   if (!hasSupabase()) {
     return (
       <div className="auth-screen">
+        <BrandMark />
         <div className="auth-card">
           <h1>Setup Required</h1>
           <p className="hint">Server (Supabase) is not configured yet. Add VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY to .env.local.</p>
@@ -51,13 +53,16 @@ export default function App() {
 
   if (recovering) return <ResetPassword onDone={() => setRecovering(false)} />
   if (!session) return <Login />
-  if (loadingProfile) return <div className="auth-screen"><p className="hint">Loading…</p></div>
+  if (loadingProfile) return <div className="auth-screen"><BrandMark /><p className="hint">Loading…</p></div>
   if (!profile) return <ProfileSetup userId={session.user.id} onDone={setProfile} />
 
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>ECIS IAO Task Dashboard</h1>
+        <div className="app-header-left">
+          <BrandMark />
+          <h1>ECIS IAO Task Dashboard</h1>
+        </div>
         <div className="app-header-right">
           <span className="who">{profile.name} ({profile.department})</span>
           <button className="ghost" onClick={() => signOut()}>Log out</button>

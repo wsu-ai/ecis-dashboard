@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createMyProfile } from '../lib/auth'
 import type { Profile, Role } from '../lib/types'
+import BrandMark from '../components/BrandMark'
 
 export default function ProfileSetup({ userId, onDone }: { userId: string; onDone: (p: Profile) => void }) {
   const [name, setName] = useState('')
@@ -25,6 +26,7 @@ export default function ProfileSetup({ userId, onDone }: { userId: string; onDon
 
   return (
     <div className="auth-screen">
+      <BrandMark />
       <div className="auth-card">
         <h1>Welcome 👋</h1>
         <p className="auth-sub">Tell us a bit about yourself for the dashboard.</p>
