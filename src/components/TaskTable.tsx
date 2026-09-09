@@ -69,7 +69,12 @@ export default function TaskTable({
         <thead>
           <tr>
             <th className="col-prio">Priority</th>
-            <th className="col-days" title="Days remaining until the due date">⏳</th>
+            <th className="col-days" title="Days remaining until the due date" aria-label="Days remaining until the due date">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+            </th>
             <th className="col-title">Task Title</th>
             <th>Requesting Dept.</th>
             {!hideOwner && <th className="col-center">Entered By</th>}
