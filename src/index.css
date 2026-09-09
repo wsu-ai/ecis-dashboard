@@ -95,6 +95,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table th.col-days,.task-table td.col-days{text-align:center;width:44px;white-space:nowrap}
 .task-table th.col-days svg{display:block;margin:0 auto}
 .prio-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle}
+.prio-flag{display:block;margin:0 auto}
 .prio-dot.prio-high{background:#D64541}
 .prio-dot.prio-medium{background:#E8B004}
 .prio-dot.prio-low{background:#3FA45B}

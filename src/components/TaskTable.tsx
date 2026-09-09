@@ -96,7 +96,19 @@ export default function TaskTable({
               <tr key={t.id}
                 className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}
                 title={t.description || undefined}>
-                <td className="col-prio"><span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} /></td>
+                <td className="col-prio">
+                  {ep === 'High' ? (
+                    <svg className="prio-flag" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                      role="img" aria-label="High">
+                      <title>High</title>
+                      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z" fill="currentColor" />
+                      <line x1="4" y1="22" x2="4" y2="15" />
+                    </svg>
+                  ) : (
+                    <span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} />
+                  )}
+                </td>
                 <td className="col-days">{daysUntilDueLabel(t.due_date)}</td>
                 <td className="col-title">{t.title}</td>
                 <td>{t.requesting_org || '-'}</td>
