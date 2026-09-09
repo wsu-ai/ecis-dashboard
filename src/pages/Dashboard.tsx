@@ -10,6 +10,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [showDeleted, setShowDeleted] = useState(false)
+  const [deptFilter, setDeptFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<TaskWithOwner | null>(null)
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null)
@@ -28,9 +29,23 @@ export default function Dashboard({ profile }: { profile: Profile }) {
 
   useEffect(() => { load() }, [])
 
+  // 데이터에 실제로 등장하는 요청 부처 목록(중복 제거, 정렬)
+  const departments = useMemo(() => {
+    const set = new Set<string>()
+    for (const t of tasks) {
+      const d = t.requesting_org?.trim()
+      if (d) set.add(d)
+    }
+    return [...set].sort((a, b) => a.localeCompare(b))
+  }, [tasks])
+
   const visible = useMemo(
-    () => tasks.filter((t) => showDeleted ? !!t.deleted_at : !t.deleted_at),
-    [tasks, showDeleted],
+    () => tasks.filter((t) => {
+      if (showDeleted ? !t.deleted_at : !!t.deleted_at) return false
+      if (deptFilter !== 'All' && t.requesting_org?.trim() !== deptFilter) return false
+      return true
+    }),
+    [tasks, showDeleted, deptFilter],
   )
 
   // 본인이 등록한 업무이거나 관리자면 수정/삭제 가능
@@ -52,9 +67,18 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   return (
     <div className="dash">
       <div className="dash-toolbar">
-        <div className="dash-tabs">
-          <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>All Tasks</button>
-          <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
+        <div className="dash-toolbar-left">
+          <div className="dash-tabs">
+            <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>All Tasks</button>
+            <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
+          </div>
+          <label className="dept-filter">
+            <span>Show Tasks From:&nbsp;</span>
+            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
+              <option value="All">All</option>
+              {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </label>
         </div>
         <div className="dash-toolbar-actions">
           <button className="primary" onClick={openCreate}>New Task+</button>
