@@ -5,6 +5,16 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
+const WEEKDAYS = [
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+]
+
+// Date → "Wednesday, September 9, 2026"
+export function formatLongDate(d: Date = new Date()): string {
+  if (Number.isNaN(d.getTime())) return ''
+  return `${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+}
+
 // Date → "September 8, 2026 02:30 PM"
 export function formatRefreshed(d: Date): string {
   if (Number.isNaN(d.getTime())) return ''

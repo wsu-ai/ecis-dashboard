@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard'
 import MyTasks from './pages/MyTasks'
 import ResetPassword from './pages/ResetPassword'
 import BrandMark from './components/BrandMark'
+import { formatLongDate } from './lib/format'
 
 type Tab = 'dashboard' | 'mytasks'
 
@@ -61,7 +62,8 @@ export default function App() {
       <header className="app-header">
         <div className="app-header-left">
           <BrandMark />
-          <h1>ECIS IAO Task Dashboard</h1>
+          <h1>International Office Task Dashboard</h1>
+          <span className="app-date">{formatLongDate()}</span>
         </div>
         <div className="app-header-right">
           <span className="who">{profile.name} ({profile.department})</span>

@@ -51,6 +51,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .app-header-left{display:flex;align-items:center;gap:14px;min-width:0}
 .app-header h1{font-size:17px}
 .app-header .brandmark{height:30px}
+.app-date{font-size:13px;color:var(--gray);white-space:nowrap}
 .app-header-right{display:flex;align-items:center;gap:14px}
 .who{font-size:13px;color:var(--gray)}
 .app-tabs{display:flex;gap:4px;padding:10px 22px 0;background:#fff;border-bottom:1px solid var(--border)}

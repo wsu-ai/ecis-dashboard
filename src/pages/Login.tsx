@@ -53,7 +53,7 @@ export default function Login() {
     <div className="auth-screen">
       <BrandMark />
       <div className="auth-card">
-        <h1>ECIS IAO Task Dashboard</h1>
+        <h1>Endicott International Office Dashboard</h1>
         <p className="auth-sub">{mode === 'signin' ? 'Sign In' : 'Sign Up'}</p>
 
         <label className="field">
