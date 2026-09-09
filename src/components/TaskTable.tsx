@@ -29,6 +29,13 @@ function daysUntilDue(iso: string | null): number | null {
   return Math.round((due.getTime() - today.getTime()) / 86_400_000)
 }
 
+// 남은 일수 표시: 마감일 없으면 '-', 오늘이면 'Today'
+function daysUntilDueLabel(iso: string | null): string {
+  const n = daysUntilDue(iso)
+  if (n === null) return '-'
+  return n === 0 ? 'Today' : String(n)
+}
+
 // 정렬: 1) 우선순위 High→Medium→Low, 2) 마감일이 오늘과 가까운 순(마감일 없으면 맨 뒤)
 export function sortTasks(rows: TaskWithOwner[]): TaskWithOwner[] {
   return [...rows].sort((a, b) => {
@@ -85,7 +92,7 @@ export default function TaskTable({
                 className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}
                 title={t.description || undefined}>
                 <td className="col-prio"><span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} /></td>
-                <td className="col-days">{daysUntilDue(t.due_date) ?? '-'}</td>
+                <td className="col-days">{daysUntilDueLabel(t.due_date)}</td>
                 <td className="col-title">{t.title}</td>
                 <td>{t.requesting_org || '-'}</td>
                 {!hideOwner && (
