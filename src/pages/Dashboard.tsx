@@ -4,6 +4,7 @@ import type { Profile, TaskWithOwner } from '../lib/types'
 import { formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 import TaskTable from '../components/TaskTable'
+import TaskCalendar from '../components/TaskCalendar'
 
 export default function Dashboard({ profile }: { profile: Profile }) {
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
@@ -48,6 +49,9 @@ export default function Dashboard({ profile }: { profile: Profile }) {
     [tasks, showDeleted, deptFilter],
   )
 
+  // 달력에는 삭제되지 않은 모든 업무를 표시한다
+  const activeTasks = useMemo(() => tasks.filter((t) => !t.deleted_at), [tasks])
+
   // 본인이 등록한 업무이거나 관리자면 수정/삭제 가능
   const canModify = (t: TaskWithOwner) => t.owner_id === profile.id || profile.is_admin
 
@@ -65,52 +69,58 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   }
 
   return (
-    <div className="dash">
-      <div className="dash-toolbar">
-        <div className="dash-toolbar-left">
-          <div className="dash-tabs">
-            <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>All Tasks</button>
-            <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
+    <div className="dash dash-layout">
+      <aside className="dash-cal">
+        <TaskCalendar tasks={activeTasks} onSelectTask={openEdit} />
+      </aside>
+
+      <div className="dash-main">
+        <div className="dash-toolbar">
+          <div className="dash-toolbar-left">
+            <div className="dash-tabs">
+              <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>All Tasks</button>
+              <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
+            </div>
+            <label className="dept-filter">
+              <span>Show Tasks From:&nbsp;</span>
+              <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
+                <option value="All">All</option>
+                {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </label>
           </div>
-          <label className="dept-filter">
-            <span>Show Tasks From:&nbsp;</span>
-            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
-              <option value="All">All</option>
-              {departments.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-          </label>
+          <div className="dash-toolbar-actions">
+            <button className="primary" onClick={openCreate}>New Task+</button>
+            <button className="ghost" onClick={load}>Refresh</button>
+          </div>
         </div>
-        <div className="dash-toolbar-actions">
-          <button className="primary" onClick={openCreate}>New Task+</button>
-          <button className="ghost" onClick={load}>Refresh</button>
-        </div>
+
+        {refreshedAt && (
+          <p className="dash-refreshed">Last Refreshed at {formatRefreshed(refreshedAt)}</p>
+        )}
+
+        {loading && <p className="hint">Loading…</p>}
+        {err && <p className="hint err">{err}</p>}
+
+        {!loading && !err && (
+          <TaskTable
+            rows={visible}
+            showDeleted={showDeleted}
+            canModify={canModify}
+            onEdit={openEdit}
+            onDelete={remove}
+          />
+        )}
+
+        {modalOpen && (
+          <TaskFormModal
+            userId={profile.id}
+            task={editing}
+            onClose={() => { setModalOpen(false); setEditing(null) }}
+            onSaved={load}
+          />
+        )}
       </div>
-
-      {refreshedAt && (
-        <p className="dash-refreshed">Last Refreshed at {formatRefreshed(refreshedAt)}</p>
-      )}
-
-      {loading && <p className="hint">Loading…</p>}
-      {err && <p className="hint err">{err}</p>}
-
-      {!loading && !err && (
-        <TaskTable
-          rows={visible}
-          showDeleted={showDeleted}
-          canModify={canModify}
-          onEdit={openEdit}
-          onDelete={remove}
-        />
-      )}
-
-      {modalOpen && (
-        <TaskFormModal
-          userId={profile.id}
-          task={editing}
-          onClose={() => { setModalOpen(false); setEditing(null) }}
-          onSaved={load}
-        />
-      )}
     </div>
   )
 }

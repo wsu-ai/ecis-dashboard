@@ -60,6 +60,36 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .app-main{flex:1;padding:22px;max-width:1400px;width:100%;margin:0 auto}
 
 /* ── 대시보드 ── */
+.dash-layout{display:flex;gap:20px;align-items:flex-start}
+.dash-cal{flex:0 0 300px}
+.dash-main{flex:1;min-width:0}
+@media (max-width:960px){
+  .dash-layout{flex-direction:column}
+  .dash-cal{flex:none;width:100%;max-width:420px}
+}
+
+/* ── 달력 ── */
+.cal{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-title{font-weight:700;font-size:14px;color:var(--ink)}
+.cal-nav{width:28px;height:28px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:15px;line-height:1;color:var(--ink)}
+.cal-today{display:block;margin:0 auto 8px;background:none;border:none;font-size:12px;color:var(--teal2);text-decoration:underline;padding:2px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{margin-bottom:2px}
+.cal-dow-cell{text-align:center;font-size:10px;font-weight:700;color:var(--gray);padding:2px 0}
+.cal-cell{min-height:42px;border:1px solid var(--border);border-radius:6px;padding:3px;background:#fff;display:flex;flex-direction:column;gap:3px}
+.cal-cell.cal-out{background:var(--panel)}
+.cal-cell.cal-today-cell{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal)}
+.cal-daynum{font-size:10px;color:var(--gray);line-height:1}
+.cal-out .cal-daynum{color:var(--faint)}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
+.cal-dot{width:8px;height:8px;border-radius:50%;border:none;padding:0;cursor:pointer}
+.cal-dot.prio-high{background:#D64541}
+.cal-dot.prio-medium{background:#E8B004}
+.cal-dot.prio-low{background:#3FA45B}
+.cal-more{font-size:9px;color:var(--gray);line-height:1}
+.cal-note{margin:8px 0 0;font-size:11px;color:var(--faint);text-align:center}
+
 .dash-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
 .dash-toolbar-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .dash-toolbar-actions{display:flex;align-items:center;gap:8px}
