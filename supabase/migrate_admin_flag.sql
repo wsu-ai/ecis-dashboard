@@ -10,5 +10,5 @@ create policy "tasks_update_admin" on tasks
   with check (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin));
 
 -- 관리자 지정 예시 (이메일은 실제 값으로 바꾸세요):
--- update profiles set is_admin = true
--- where id = (select id from auth.users where email = 'john.yun@wsu.ac.kr');
+update profiles set is_admin = true
+where id = (select id from auth.users where email = 'john.yun@wsu.ac.kr');

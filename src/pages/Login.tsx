@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { signIn, signUp } from '../lib/auth'
+import ForgotPassword from './ForgotPassword'
 
 export default function Login() {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -43,6 +44,10 @@ export default function Login() {
     }
   }
 
+  if (mode === 'forgot') {
+    return <ForgotPassword onBack={() => { setMode('signin'); setErr(''); setNotice('') }} />
+  }
+
   return (
     <div className="auth-screen">
       <div className="auth-card">
@@ -66,6 +71,15 @@ export default function Login() {
         <button className="primary" disabled={busy} onClick={submit}>
           {busy ? 'Working…' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
         </button>
+
+        {mode === 'signin' && (
+          <p className="auth-forgot">
+            Forgot password? Click{' '}
+            <button type="button" className="linklike-inline"
+              onClick={() => { setMode('forgot'); setErr(''); setNotice('') }}>here</button>{' '}
+            to reset a password.
+          </p>
+        )}
 
         <button className="linklike" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setErr(''); setNotice('') }}>
           {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}

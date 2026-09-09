@@ -13,6 +13,18 @@ export async function signOut() {
   return supabase.auth.signOut()
 }
 
+// 비밀번호 재설정 메일 발송 — 메일의 링크는 앱으로 돌아오며 PASSWORD_RECOVERY 세션을 만든다.
+export async function sendPasswordReset(email: string) {
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname,
+  })
+}
+
+// 복구 세션 상태에서 새 비밀번호 저장
+export async function updatePassword(password: string) {
+  return supabase.auth.updateUser({ password })
+}
+
 export async function getMyProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
   if (error) throw error

@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import ProfileSetup from './pages/ProfileSetup'
 import Dashboard from './pages/Dashboard'
 import MyTasks from './pages/MyTasks'
+import ResetPassword from './pages/ResetPassword'
 
 type Tab = 'dashboard' | 'mytasks'
 
@@ -14,12 +15,18 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loadingProfile, setLoadingProfile] = useState(true)
+  const [recovering, setRecovering] = useState(false) // 비밀번호 재설정 메일 링크로 진입
   const [tab, setTab] = useState<Tab>('dashboard') // land on the dashboard (all tasks) first
 
   useEffect(() => {
     if (!hasSupabase()) { setLoadingProfile(false); return }
+    // 재설정 메일 링크는 URL 해시에 type=recovery 를 달고 돌아온다
+    if (/type=recovery/.test(window.location.hash)) setRecovering(true)
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s))
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'PASSWORD_RECOVERY') setRecovering(true)
+      setSession(s)
+    })
     return () => sub.subscription.unsubscribe()
   }, [])
 
@@ -42,6 +49,7 @@ export default function App() {
     )
   }
 
+  if (recovering) return <ResetPassword onDone={() => setRecovering(false)} />
   if (!session) return <Login />
   if (loadingProfile) return <div className="auth-screen"><p className="hint">Loading…</p></div>
   if (!profile) return <ProfileSetup userId={session.user.id} onDone={setProfile} />
