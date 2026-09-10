@@ -83,7 +83,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
         <div className="dash-toolbar">
           <div className="dash-toolbar-left">
             <div className="dash-tabs">
-              <button className={view === 'all' ? 'on' : ''} onClick={() => setView('all')}>All Tasks</button>
+              <button className={view === 'all' ? 'on' : ''} onClick={() => setView('all')}>Active Tasks</button>
               <button className={view === 'expired' ? 'on' : ''} onClick={() => setView('expired')}>Expired Tasks</button>
               <button className={view === 'deleted' ? 'on' : ''} onClick={() => setView('deleted')}>Deleted Tasks</button>
             </div>
