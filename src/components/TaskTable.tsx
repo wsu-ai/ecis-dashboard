@@ -5,7 +5,8 @@ import { formatDateMDY, formatDueMDY } from '../lib/format'
 const WEEK_MS = 7 * 86_400_000
 const PRIO_RANK: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 }
 
-function isOverdue(t: TaskWithOwner): boolean {
+// 마감 일시가 이미 지난(완료/삭제 제외) 업무 = 만료
+export function isExpired(t: TaskWithOwner): boolean {
   return !!t.due_date && new Date(t.due_date).getTime() < Date.now()
     && t.status !== 'Completed' && !t.deleted_at
 }
@@ -36,17 +37,23 @@ function daysUntilDueLabel(iso: string | null): string {
   return n === 0 ? 'Today' : String(n)
 }
 
-// 정렬: 1) 우선순위 High→Medium→Low, 2) 마감일이 오늘과 가까운 순(마감일 없으면 맨 뒤)
+// 정렬 카테고리: 0) 만료  1) High  2) Medium  3) Low
+function sortRank(t: TaskWithOwner): number {
+  if (isExpired(t)) return 0
+  return PRIO_RANK[effectivePriority(t)] + 1
+}
+
+// 정렬: 1) 만료 → High → Medium → Low, 2) 같은 카테고리는 마감일 내림차순(마감일 없으면 맨 뒤)
 export function sortTasks(rows: TaskWithOwner[]): TaskWithOwner[] {
   return [...rows].sort((a, b) => {
-    const pr = PRIO_RANK[effectivePriority(a)] - PRIO_RANK[effectivePriority(b)]
-    if (pr !== 0) return pr
-    const da = daysUntilDue(a.due_date)
-    const db = daysUntilDue(b.due_date)
-    if (da === null && db === null) return 0
-    if (da === null) return 1
-    if (db === null) return -1
-    return Math.abs(da) - Math.abs(db)
+    const r = sortRank(a) - sortRank(b)
+    if (r !== 0) return r
+    const ta = a.due_date ? new Date(a.due_date).getTime() : null
+    const tb = b.due_date ? new Date(b.due_date).getTime() : null
+    if (ta === null && tb === null) return 0
+    if (ta === null) return 1
+    if (tb === null) return -1
+    return tb - ta // 마감일 내림차순
   })
 }
 
@@ -92,12 +99,13 @@ export default function TaskTable({
           )}
           {sorted.map((t) => {
             const ep = effectivePriority(t)
+            const expired = isExpired(t)
             return (
               <tr key={t.id}
-                className={[prioClass(ep), isOverdue(t) ? 'overdue' : ''].filter(Boolean).join(' ')}
+                className={expired ? 'expired' : prioClass(ep)}
                 title={t.description || undefined}>
                 <td className="col-prio">
-                  {ep === 'High' ? (
+                  {expired ? null : ep === 'High' ? (
                     <svg className="prio-flag" width="16" height="16" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                       role="img" aria-label="High">
@@ -109,7 +117,7 @@ export default function TaskTable({
                     <span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} />
                   )}
                 </td>
-                <td className="col-days">{daysUntilDueLabel(t.due_date)}</td>
+                <td className="col-days">{expired ? 'Expired' : daysUntilDueLabel(t.due_date)}</td>
                 <td className="col-title">{t.title}</td>
                 <td>{t.requesting_org || '-'}</td>
                 {!hideOwner && (
@@ -124,11 +132,13 @@ export default function TaskTable({
                   <td className="col-actions">
                     {canModify(t) && (
                       <div className="row-actions">
-                        <button className="icon-btn" title="Edit task" aria-label="Edit task" onClick={() => onEdit(t)}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                          </svg>
-                        </button>
+                        {!expired && (
+                          <button className="icon-btn" title="Edit task" aria-label="Edit task" onClick={() => onEdit(t)}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                            </svg>
+                          </button>
+                        )}
                         <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => onDelete(t)}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />

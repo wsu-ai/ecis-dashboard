@@ -42,7 +42,7 @@ create table if not exists tasks (
   contact_info text,         -- 문의사항 연락처
   required_documents text,   -- 제출서류
 
-  status text not null default 'Received' check (status in ('Received', 'In Progress', 'Completed', 'On Hold')),
+  status text not null default 'Received' check (status in ('Received', 'In Progress', 'Completed', 'On Hold', 'Expired')),
   priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High')),
   task_date date,        -- 업무 일자 (사용자가 등록 시 입력)
   due_date timestamptz,   -- 마감 일시

@@ -111,6 +111,7 @@ export default function TaskFormModal({
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
               <option value="On Hold">On Hold</option>
+              <option value="Expired">Expired</option>
             </select>
           </label>
           <label className="field">

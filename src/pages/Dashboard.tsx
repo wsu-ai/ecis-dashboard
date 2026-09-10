@@ -3,14 +3,16 @@ import { fetchAllTasks, softDeleteTask } from '../lib/tasks'
 import type { Profile, TaskWithOwner } from '../lib/types'
 import { formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
-import TaskTable from '../components/TaskTable'
+import TaskTable, { isExpired } from '../components/TaskTable'
 import TaskCalendar from '../components/TaskCalendar'
+
+type View = 'all' | 'expired' | 'deleted'
 
 export default function Dashboard({ profile }: { profile: Profile }) {
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
-  const [showDeleted, setShowDeleted] = useState(false)
+  const [view, setView] = useState<View>('all')
   const [deptFilter, setDeptFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<TaskWithOwner | null>(null)
@@ -42,11 +44,14 @@ export default function Dashboard({ profile }: { profile: Profile }) {
 
   const visible = useMemo(
     () => tasks.filter((t) => {
-      if (showDeleted ? !t.deleted_at : !!t.deleted_at) return false
+      if (view === 'deleted') { if (!t.deleted_at) return false }
+      else if (t.deleted_at) return false
+      if (view === 'all' && isExpired(t)) return false
+      if (view === 'expired' && !isExpired(t)) return false
       if (deptFilter !== 'All' && t.requesting_org?.trim() !== deptFilter) return false
       return true
     }),
-    [tasks, showDeleted, deptFilter],
+    [tasks, view, deptFilter],
   )
 
   // 달력에는 삭제되지 않은 모든 업무를 표시한다
@@ -78,8 +83,9 @@ export default function Dashboard({ profile }: { profile: Profile }) {
         <div className="dash-toolbar">
           <div className="dash-toolbar-left">
             <div className="dash-tabs">
-              <button className={!showDeleted ? 'on' : ''} onClick={() => setShowDeleted(false)}>All Tasks</button>
-              <button className={showDeleted ? 'on' : ''} onClick={() => setShowDeleted(true)}>Deleted Tasks</button>
+              <button className={view === 'all' ? 'on' : ''} onClick={() => setView('all')}>All Tasks</button>
+              <button className={view === 'expired' ? 'on' : ''} onClick={() => setView('expired')}>Expired Tasks</button>
+              <button className={view === 'deleted' ? 'on' : ''} onClick={() => setView('deleted')}>Deleted Tasks</button>
             </div>
             <label className="dept-filter">
               <span>Show Tasks From:&nbsp;</span>
@@ -105,7 +111,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
         {!loading && !err && (
           <TaskTable
             rows={visible}
-            showDeleted={showDeleted}
+            showDeleted={view === 'deleted'}
             canModify={canModify}
             onEdit={openEdit}
             onDelete={remove}

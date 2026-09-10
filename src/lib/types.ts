@@ -1,5 +1,5 @@
 export type Role = 'Faculty' | 'Assistant' | 'Staff'
-export type Status = 'Received' | 'In Progress' | 'Completed' | 'On Hold'
+export type Status = 'Received' | 'In Progress' | 'Completed' | 'On Hold' | 'Expired'
 export type Priority = 'Low' | 'Medium' | 'High'
 
 export type Profile = {
