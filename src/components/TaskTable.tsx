@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import type { Priority, TaskWithOwner } from '../lib/types'
 import { formatDateMDY, formatDueMDY } from '../lib/format'
-import { ATTACHMENT_ACCEPT, getAttachmentUrl, uploadTaskAttachment } from '../lib/attachments'
+import { ATTACHMENT_ACCEPT, getAttachmentUrl, isAsciiFileName, uploadTaskAttachment } from '../lib/attachments'
 import { setTaskAttachment } from '../lib/tasks'
 
 const WEEK_MS = 7 * 86_400_000
@@ -98,6 +98,11 @@ export default function TaskTable({
     e.target.value = ''
     pendingTaskId.current = null
     if (!file || !taskId) return
+    if (!isAsciiFileName(file.name)) {
+      alert('The file name contains non-English characters (e.g. Korean, accented letters, or emoji). '
+        + 'Please rename the file using only plain ASCII characters (English letters, numbers, spaces, - and _) and try again.')
+      return
+    }
     setUploadingId(taskId)
     try {
       const { path, name } = await uploadTaskAttachment(taskId, file)
