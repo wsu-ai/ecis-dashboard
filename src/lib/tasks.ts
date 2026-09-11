@@ -66,6 +66,15 @@ export async function updateTask(id: string, input: TaskInput) {
   if (error) throw error
 }
 
+// 첨부파일 정보 갱신 (업로드 후 경로/원본 파일명을 저장)
+export async function setTaskAttachment(id: string, path: string | null, name: string | null) {
+  const { error } = await supabase
+    .from('tasks')
+    .update({ attachment_path: path, attachment_name: name })
+    .eq('id', id)
+  if (error) throw error
+}
+
 // 소프트 삭제 — 실제 DELETE는 RLS로 막혀있어 여기선 UPDATE만 사용한다.
 export async function softDeleteTask(id: string, userId: string) {
   const { error } = await supabase

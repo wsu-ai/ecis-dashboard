@@ -135,12 +135,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table tr.expired .icon-btn{color:#fff}
 .task-table tr.expired .icon-btn:hover{background:rgba(255,255,255,.18);color:#fff}
 
-/* ── 행 끝 수정/삭제 아이콘 버튼 ── */
-.task-table th.col-actions,.task-table td.col-actions{width:78px;padding-left:6px;text-align:center;white-space:nowrap}
+/* ── 행 끝 첨부/수정/삭제 아이콘 버튼 ── */
+.task-table th.col-actions,.task-table td.col-actions{width:110px;padding-left:6px;text-align:center;white-space:nowrap}
 .row-actions{display:inline-flex;gap:2px}
 .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:none;background:none;border-radius:7px;color:var(--gray)}
 .icon-btn:hover{background:var(--panel);color:var(--ink)}
+.icon-btn:disabled{opacity:.5;cursor:default}
 .icon-btn[aria-label="Delete task"]:hover{background:rgba(200,69,59,.12);color:var(--live)}
+.icon-btn.icon-attachment-on{color:#1E63C7}
+.icon-btn.icon-attachment-on:hover{background:rgba(30,99,199,.14);color:#1E63C7}
+.task-table tr.expired .icon-attachment-on{color:#9CC6FF}
 
 /* ── 우선순위: 색 원 + 행 배경 ── */
 .task-table th.col-prio,.task-table td.col-prio{text-align:center;width:60px;white-space:nowrap}
@@ -156,6 +160,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table tr.prio-high .prio-dot{background:#fff}
 .task-table tr.prio-high .icon-btn{color:#fff}
 .task-table tr.prio-high .icon-btn:hover{background:rgba(255,255,255,.22);color:#fff}
+.task-table tr.prio-high .icon-attachment-on{color:#DCEBFF}
 .task-table tr.prio-medium td{background:rgba(232,176,4,.13)}
 .task-table tr.prio-low td{background:rgba(63,164,91,.10)}
 

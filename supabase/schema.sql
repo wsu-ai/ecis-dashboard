@@ -47,6 +47,9 @@ create table if not exists tasks (
   task_date date,        -- 업무 일자 (사용자가 등록 시 입력)
   due_date timestamptz,   -- 마감 일시
 
+  attachment_path text,  -- Storage 객체 경로 (task-attachments 버킷)
+  attachment_name text,  -- 업로드 당시 원본 파일명
+
   -- 소프트 삭제: 실제 DELETE는 RLS로 막고, 이 두 컬럼만 채워서 "삭제 처리"한다.
   deleted_at timestamptz,
   deleted_by uuid references profiles(id),
@@ -99,3 +102,25 @@ drop trigger if exists tasks_set_updated_at on tasks;
 create trigger tasks_set_updated_at
   before update on tasks
   for each row execute function set_updated_at();
+
+
+-- ── 첨부파일 저장용 Storage 버킷 (비공개, 서명된 URL로만 접근) ──
+insert into storage.buckets (id, name, public)
+values ('task-attachments', 'task-attachments', false)
+on conflict (id) do nothing;
+
+drop policy if exists "task_attachments_select" on storage.objects;
+create policy "task_attachments_select" on storage.objects
+  for select using (bucket_id = 'task-attachments' and auth.role() = 'authenticated');
+
+drop policy if exists "task_attachments_insert" on storage.objects;
+create policy "task_attachments_insert" on storage.objects
+  for insert with check (bucket_id = 'task-attachments' and auth.role() = 'authenticated');
+
+drop policy if exists "task_attachments_update" on storage.objects;
+create policy "task_attachments_update" on storage.objects
+  for update using (bucket_id = 'task-attachments' and auth.role() = 'authenticated');
+
+drop policy if exists "task_attachments_delete" on storage.objects;
+create policy "task_attachments_delete" on storage.objects
+  for delete using (bucket_id = 'task-attachments' and auth.role() = 'authenticated');

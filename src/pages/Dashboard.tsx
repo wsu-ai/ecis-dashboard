@@ -117,6 +117,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
             canModify={canModify}
             onEdit={openEdit}
             onDelete={remove}
+            onRefresh={load}
           />
         )}
 

@@ -25,6 +25,8 @@ export type Task = {
   priority: Priority
   task_date: string | null // YYYY-MM-DD (date)
   due_date: string | null // ISO timestamp (timestamptz)
+  attachment_path: string | null // Storage 객체 경로 (task-attachments 버킷)
+  attachment_name: string | null // 업로드 당시 원본 파일명
   deleted_at: string | null
   deleted_by: string | null
   created_at: string

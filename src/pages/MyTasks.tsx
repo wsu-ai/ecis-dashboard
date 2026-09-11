@@ -72,6 +72,7 @@ export default function MyTasks({ profile }: { profile: Profile }) {
           canModify={() => true}
           onEdit={openEdit}
           onDelete={remove}
+          onRefresh={load}
         />
       )}
 

@@ -1,6 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import type { Priority, TaskWithOwner } from '../lib/types'
 import { formatDateMDY, formatDueMDY } from '../lib/format'
+import { ATTACHMENT_ACCEPT, getAttachmentUrl, uploadTaskAttachment } from '../lib/attachments'
+import { setTaskAttachment } from '../lib/tasks'
 
 const WEEK_MS = 7 * 86_400_000
 const PRIO_RANK: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 }
@@ -58,7 +60,7 @@ export function sortTasks(rows: TaskWithOwner[]): TaskWithOwner[] {
 }
 
 export default function TaskTable({
-  rows, showDeleted, canModify, onEdit, onDelete,
+  rows, showDeleted, canModify, onEdit, onDelete, onRefresh,
   hideOwner = false, hideStatus = false, hideEnterDate = false,
 }: {
   rows: TaskWithOwner[]
@@ -66,12 +68,47 @@ export default function TaskTable({
   canModify: (t: TaskWithOwner) => boolean
   onEdit: (t: TaskWithOwner) => void
   onDelete: (t: TaskWithOwner) => void
+  onRefresh: () => void | Promise<void>
   hideOwner?: boolean
   hideStatus?: boolean
   hideEnterDate?: boolean
 }) {
   const sorted = useMemo(() => sortTasks(rows), [rows])
   const colCount = 10 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const pendingTaskId = useRef<string | null>(null)
+  const [uploadingId, setUploadingId] = useState<string | null>(null)
+
+  // 첨부파일이 있으면 새 탭에서 열고, 없고 수정 권한이 있으면 파일 선택창을 연다
+  function openAttachment(t: TaskWithOwner) {
+    if (t.attachment_path) {
+      getAttachmentUrl(t.attachment_path)
+        .then((url) => window.open(url, '_blank', 'noopener,noreferrer'))
+        .catch((e: any) => alert(e?.message || 'Failed to open the attachment.'))
+    } else if (canModify(t)) {
+      pendingTaskId.current = t.id
+      fileInputRef.current?.click()
+    }
+  }
+
+  async function handleFileSelected(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    const taskId = pendingTaskId.current
+    e.target.value = ''
+    pendingTaskId.current = null
+    if (!file || !taskId) return
+    setUploadingId(taskId)
+    try {
+      const { path, name } = await uploadTaskAttachment(taskId, file)
+      await setTaskAttachment(taskId, path, name)
+      await onRefresh()
+    } catch (e: any) {
+      alert(e?.message || 'Failed to upload the attachment.')
+    } finally {
+      setUploadingId(null)
+    }
+  }
 
   return (
     <div className="table-wrap">
@@ -133,20 +170,35 @@ export default function TaskTable({
                 {showDeleted && <td className="col-deleted">{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 {!showDeleted && (
                   <td className="col-actions">
-                    {canModify(t) && (
+                    {(canModify(t) || t.attachment_path) && (
                       <div className="row-actions">
-                        {!expired && (
+                        <button
+                          className={`icon-btn ${t.attachment_path ? 'icon-attachment-on' : ''}`}
+                          title={uploadingId === t.id
+                            ? 'Uploading…'
+                            : t.attachment_path ? 'Click to View Attachment' : 'Attach a file'}
+                          aria-label={t.attachment_path ? 'View attachment' : 'Attach a file'}
+                          disabled={uploadingId === t.id}
+                          onClick={() => openAttachment(t)}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                          </svg>
+                        </button>
+                        {canModify(t) && !expired && (
                           <button className="icon-btn" title="Edit task" aria-label="Edit task" onClick={() => onEdit(t)}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
                             </svg>
                           </button>
                         )}
-                        <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => onDelete(t)}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
-                          </svg>
-                        </button>
+                        {canModify(t) && (
+                          <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => onDelete(t)}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
+                            </svg>
+                          </button>
+                        )}
                       </div>
                     )}
                   </td>
@@ -156,6 +208,14 @@ export default function TaskTable({
           })}
         </tbody>
       </table>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ATTACHMENT_ACCEPT}
+        hidden
+        onChange={handleFileSelected}
+      />
     </div>
   )
 }
