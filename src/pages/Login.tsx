@@ -14,7 +14,7 @@ export default function Login() {
   async function submit() {
     setErr(''); setNotice('')
     if (!email.trim() || !password.trim()) return
-    if (!/@(.*\.)?wsu\.ac\.kr$/i.test(email.trim())) {
+    if (!/@(.*\.)?(wsu\.ac\.kr|woosong\.org)$/i.test(email.trim())) {
       setErr('Email address must be a valid Woosong email address.')
       return
     }

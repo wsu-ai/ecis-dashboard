@@ -12,7 +12,7 @@ export default function ForgotPassword({ onBack }: { onBack: () => void }) {
     setErr('')
     const e = email.trim()
     if (!e) return
-    if (!/@(.*\.)?wsu\.ac\.kr$/i.test(e)) {
+    if (!/@(.*\.)?(wsu\.ac\.kr|woosong\.org)$/i.test(e)) {
       setErr('Email address must be a valid Woosong email address.')
       return
     }
