@@ -86,13 +86,13 @@ export default function TaskTable({
               </svg>
             </th>
             <th className="col-title">Task Title</th>
-            <th className="col-center">Requesting Dept.</th>
-            {!hideOwner && <th className="col-center">Entered By</th>}
-            {!hideStatus && <th className="col-center">Status</th>}
-            <th>Due Date</th>
-            <th className="col-center">Task Registered Date</th>
-            {!hideEnterDate && <th>Enter Date</th>}
-            {showDeleted && <th>Deleted By / At</th>}
+            <th className="col-center col-dept">Requesting Dept.</th>
+            {!hideOwner && <th className="col-center col-owner">Entered By</th>}
+            {!hideStatus && <th className="col-center col-status">Status</th>}
+            <th className="col-due">Due Date</th>
+            <th className="col-center col-taskdate">Task Registered Date</th>
+            {!hideEnterDate && <th className="col-enterdate">Enter Date</th>}
+            {showDeleted && <th className="col-deleted">Deleted By / At</th>}
             {!showDeleted && <th className="col-actions" aria-label="Actions" />}
           </tr>
         </thead>
@@ -122,15 +122,15 @@ export default function TaskTable({
                 </td>
                 <td className="col-days">{expired ? 'Expired' : daysUntilDueLabel(t.due_date)}</td>
                 <td className="col-title">{t.title}</td>
-                <td className="col-center">{t.requesting_org || '-'}</td>
+                <td className="col-center col-dept">{t.requesting_org || '-'}</td>
                 {!hideOwner && (
-                  <td className="col-center">{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
+                  <td className="col-center col-owner">{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                 )}
-                {!hideStatus && <td className="col-center">{t.status}</td>}
-                <td>{t.due_date ? formatDueMDY(t.due_date) : 'TBD'}</td>
-                <td className="col-center">{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
-                {!hideEnterDate && <td>{formatDueMDY(t.created_at)}</td>}
-                {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
+                {!hideStatus && <td className="col-center col-status">{t.status}</td>}
+                <td className="col-due">{t.due_date ? formatDueMDY(t.due_date) : 'TBD'}</td>
+                <td className="col-center col-taskdate">{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
+                {!hideEnterDate && <td className="col-enterdate">{formatDueMDY(t.created_at)}</td>}
+                {showDeleted && <td className="col-deleted">{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 {!showDeleted && (
                   <td className="col-actions">
                     {canModify(t) && (

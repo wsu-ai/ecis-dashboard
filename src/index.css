@@ -182,3 +182,20 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
   .field-row{flex-direction:column;gap:0}
   .app-header{flex-direction:column;align-items:flex-start;gap:8px}
 }
+
+/* 휴대폰 세로 모드: Priority / Task Title / Due Date / 수정·삭제 아이콘만 표시 */
+@media (max-width:480px) and (orientation:portrait){
+  .task-table .col-days,
+  .task-table .col-dept,
+  .task-table .col-owner,
+  .task-table .col-status,
+  .task-table .col-taskdate,
+  .task-table .col-enterdate,
+  .task-table .col-deleted{
+    display:none;
+  }
+  /* 남은 폭은 제목/마감일이 균등하게 나눠 갖는다 */
+  .task-table th.col-title,.task-table td.col-title{width:auto;white-space:normal}
+  .task-table th.col-due,.task-table td.col-due{width:auto}
+  .task-table th,.task-table td{padding:8px 6px}
+}
