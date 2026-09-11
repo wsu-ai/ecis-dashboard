@@ -148,8 +148,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 /* 업로드된 문서 아이콘 이미지: currentColor로 물들여 상태색(파랑/만료 회색 등)을 그대로 따라간다 */
 .icon-doc-img{
   display:inline-block;width:27px;height:27px;background-color:currentColor;
-  -webkit-mask:url(/document-icon.png) center/contain no-repeat;
-  mask:url(/document-icon.png) center/contain no-repeat;
+  -webkit-mask:url(/file_attachment.png) center/contain no-repeat;
+  mask:url(/file_attachment.png) center/contain no-repeat;
   -webkit-mask-mode:alpha;mask-mode:alpha;
 }
 
