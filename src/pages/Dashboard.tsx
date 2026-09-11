@@ -112,6 +112,8 @@ export default function Dashboard({ profile }: { profile: Profile }) {
           <TaskTable
             rows={visible}
             showDeleted={view === 'deleted'}
+            hideStatus={view === 'all'}
+            hideEnterDate={view === 'all'}
             canModify={canModify}
             onEdit={openEdit}
             onDelete={remove}

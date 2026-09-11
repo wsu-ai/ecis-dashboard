@@ -43,7 +43,7 @@ function sortRank(t: TaskWithOwner): number {
   return PRIO_RANK[effectivePriority(t)] + 1
 }
 
-// 정렬: 1) 만료 → High → Medium → Low, 2) 같은 카테고리는 마감일 내림차순(마감일 없으면 맨 뒤)
+// 정렬: 1) 만료 → High → Medium → Low, 2) 같은 카테고리는 마감일이 가까운 순(오름차순, 마감일 없으면 맨 뒤)
 export function sortTasks(rows: TaskWithOwner[]): TaskWithOwner[] {
   return [...rows].sort((a, b) => {
     const r = sortRank(a) - sortRank(b)
@@ -53,12 +53,13 @@ export function sortTasks(rows: TaskWithOwner[]): TaskWithOwner[] {
     if (ta === null && tb === null) return 0
     if (ta === null) return 1
     if (tb === null) return -1
-    return tb - ta // 마감일 내림차순
+    return ta - tb // 마감일 오름차순 (가까운 날짜 먼저)
   })
 }
 
 export default function TaskTable({
-  rows, showDeleted, canModify, onEdit, onDelete, hideOwner = false,
+  rows, showDeleted, canModify, onEdit, onDelete,
+  hideOwner = false, hideStatus = false, hideEnterDate = false,
 }: {
   rows: TaskWithOwner[]
   showDeleted: boolean
@@ -66,9 +67,11 @@ export default function TaskTable({
   onEdit: (t: TaskWithOwner) => void
   onDelete: (t: TaskWithOwner) => void
   hideOwner?: boolean
+  hideStatus?: boolean
+  hideEnterDate?: boolean
 }) {
   const sorted = useMemo(() => sortTasks(rows), [rows])
-  const colCount = hideOwner ? 9 : 10
+  const colCount = 10 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
 
   return (
     <div className="table-wrap">
@@ -83,12 +86,12 @@ export default function TaskTable({
               </svg>
             </th>
             <th className="col-title">Task Title</th>
-            <th>Requesting Dept.</th>
+            <th className="col-center">Requesting Dept.</th>
             {!hideOwner && <th className="col-center">Entered By</th>}
-            <th className="col-center">Status</th>
+            {!hideStatus && <th className="col-center">Status</th>}
             <th>Due Date</th>
             <th className="col-center">Task Registered Date</th>
-            <th>Enter Date</th>
+            {!hideEnterDate && <th>Enter Date</th>}
             {showDeleted && <th>Deleted By / At</th>}
             {!showDeleted && <th className="col-actions" aria-label="Actions" />}
           </tr>
@@ -119,14 +122,14 @@ export default function TaskTable({
                 </td>
                 <td className="col-days">{expired ? 'Expired' : daysUntilDueLabel(t.due_date)}</td>
                 <td className="col-title">{t.title}</td>
-                <td>{t.requesting_org || '-'}</td>
+                <td className="col-center">{t.requesting_org || '-'}</td>
                 {!hideOwner && (
                   <td className="col-center">{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                 )}
-                <td className="col-center">{t.status}</td>
+                {!hideStatus && <td className="col-center">{t.status}</td>}
                 <td>{t.due_date ? formatDueMDY(t.due_date) : 'TBD'}</td>
                 <td className="col-center">{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
-                <td>{formatDueMDY(t.created_at)}</td>
+                {!hideEnterDate && <td>{formatDueMDY(t.created_at)}</td>}
                 {showDeleted && <td>{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 {!showDeleted && (
                   <td className="col-actions">

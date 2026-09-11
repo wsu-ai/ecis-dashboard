@@ -119,9 +119,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table th{text-align:center}
 .task-table td{text-align:left}
 .task-table td.col-center{text-align:center}
-/* 제목 열: 조금 넓게, 줄바꿈 없이 넘치면 말줄임 (전체 제목은 hover 툴팁으로 확인) */
+/* 제목 열: 조금 넓게, 전체 텍스트를 줄바꿈해서 표시 */
 .task-table th.col-title,.task-table td.col-title{width:22%}
-.task-table td.col-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-table td.col-title{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 .task-table tbody tr{cursor:default}
 .task-table th{color:#fff;font-weight:700;font-size:13px;background:#1E3A5F}
 .task-table th.sortable{cursor:pointer;user-select:none}
