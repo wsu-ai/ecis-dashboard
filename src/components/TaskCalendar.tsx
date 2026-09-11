@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { TaskWithOwner } from '../lib/types'
 import { effectivePriority, isExpired } from './TaskTable'
+import { koreanHolidayName } from '../lib/holidays'
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 const MONTHS = [
@@ -68,11 +69,14 @@ export default function TaskCalendar({
           const key = ymd(d)
           const inMonth = d.getMonth() === view.m
           const dayTasks = byDay.get(key) ?? []
+          const holidayName = koreanHolidayName(key)
+          const isWeekend = d.getDay() === 0 || d.getDay() === 6
           const cls = ['cal-cell']
           if (!inMonth) cls.push('cal-out')
+          if (isWeekend || holidayName) cls.push('cal-redday')
           if (key === todayKey) cls.push('cal-today-cell')
           return (
-            <div key={i} className={cls.join(' ')}>
+            <div key={i} className={cls.join(' ')} title={holidayName ?? undefined}>
               <span className="cal-daynum">{d.getDate()}</span>
               {dayTasks.length > 0 && (
                 <div className="cal-dots" title={dayTasks.map((t) => `• ${t.title}`).join('\n')}>

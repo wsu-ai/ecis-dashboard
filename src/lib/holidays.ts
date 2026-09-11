@@ -1,0 +1,70 @@
+// 대한민국 법정공휴일 (대체공휴일 포함) — "YYYY-MM-DD" → 명칭.
+// 설날/추석 등 음력 기반 공휴일과 대체공휴일 규정은 해마다 정부 발표로 바뀌므로,
+// 새해가 되면 관보에 게시되는 「관공서의 공휴일에 관한 규정」 기준으로 갱신하세요.
+const KOREAN_HOLIDAYS: Record<string, string> = {
+  // 2025
+  '2025-01-01': "New Year's Day",
+  '2025-01-28': 'Seollal (Lunar New Year) Eve',
+  '2025-01-29': 'Seollal (Lunar New Year)',
+  '2025-01-30': 'Day after Seollal',
+  '2025-03-01': 'Independence Movement Day',
+  '2025-03-03': 'Substitute Holiday (Independence Movement Day)',
+  '2025-05-05': "Children's Day / Buddha's Birthday",
+  '2025-05-06': 'Substitute Holiday',
+  '2025-06-06': 'Memorial Day',
+  '2025-08-15': 'Liberation Day',
+  '2025-10-03': 'National Foundation Day',
+  '2025-10-05': 'Chuseok Eve',
+  '2025-10-06': 'Chuseok',
+  '2025-10-07': 'Day after Chuseok',
+  '2025-10-08': 'Substitute Holiday (Chuseok)',
+  '2025-10-09': 'Hangeul Day',
+  '2025-12-25': 'Christmas Day',
+
+  // 2026
+  '2026-01-01': "New Year's Day",
+  '2026-02-16': 'Seollal (Lunar New Year) Eve',
+  '2026-02-17': 'Seollal (Lunar New Year)',
+  '2026-02-18': 'Day after Seollal',
+  '2026-03-01': 'Independence Movement Day',
+  '2026-03-02': 'Substitute Holiday (Independence Movement Day)',
+  '2026-05-05': "Children's Day",
+  '2026-05-24': "Buddha's Birthday",
+  '2026-05-25': 'Substitute Holiday',
+  '2026-06-06': 'Memorial Day',
+  '2026-08-15': 'Liberation Day',
+  '2026-08-17': 'Substitute Holiday (Liberation Day)',
+  '2026-09-24': 'Chuseok Eve',
+  '2026-09-25': 'Chuseok',
+  '2026-09-26': 'Day after Chuseok',
+  '2026-10-03': 'National Foundation Day',
+  '2026-10-05': 'Substitute Holiday (National Foundation Day)',
+  '2026-10-09': 'Hangeul Day',
+  '2026-12-25': 'Christmas Day',
+
+  // 2027
+  '2027-01-01': "New Year's Day",
+  '2027-02-06': 'Seollal (Lunar New Year) Eve',
+  '2027-02-07': 'Seollal (Lunar New Year)',
+  '2027-02-08': 'Day after Seollal',
+  '2027-02-09': 'Substitute Holiday (Seollal)',
+  '2027-03-01': 'Independence Movement Day',
+  '2027-05-05': "Children's Day",
+  '2027-05-13': "Buddha's Birthday",
+  '2027-06-06': 'Memorial Day',
+  '2027-08-15': 'Liberation Day',
+  '2027-08-16': 'Substitute Holiday (Liberation Day)',
+  '2027-09-14': 'Chuseok Eve',
+  '2027-09-15': 'Chuseok',
+  '2027-09-16': 'Day after Chuseok',
+  '2027-10-03': 'National Foundation Day',
+  '2027-10-04': 'Substitute Holiday (National Foundation Day)',
+  '2027-10-09': 'Hangeul Day',
+  '2027-10-11': 'Substitute Holiday (Hangeul Day)',
+  '2027-12-25': 'Christmas Day',
+  '2027-12-27': 'Substitute Holiday (Christmas)',
+}
+
+export function koreanHolidayName(ymd: string): string | null {
+  return KOREAN_HOLIDAYS[ymd] ?? null
+}
