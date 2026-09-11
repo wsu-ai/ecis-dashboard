@@ -74,7 +74,8 @@ export default function TaskTable({
   hideEnterDate?: boolean
 }) {
   const sorted = useMemo(() => sortTasks(rows), [rows])
-  const colCount = 10 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
+  const baseColCount = 9 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
+  const colCount = baseColCount + (showDeleted ? 1 : 2)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pendingTaskId = useRef<string | null>(null)
@@ -134,6 +135,7 @@ export default function TaskTable({
             <th className="col-center col-taskdate">Task Registered Date</th>
             {!hideEnterDate && <th className="col-enterdate">Enter Date</th>}
             {showDeleted && <th className="col-deleted">Deleted By / At</th>}
+            {!showDeleted && <th className="col-attachment">Attachment</th>}
             {!showDeleted && <th className="col-actions" aria-label="Actions" />}
           </tr>
         </thead>
@@ -173,40 +175,44 @@ export default function TaskTable({
                 {!hideEnterDate && <td className="col-enterdate">{formatDueMDY(t.created_at)}</td>}
                 {showDeleted && <td className="col-deleted">{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 {!showDeleted && (
-                  <td className="col-actions">
+                  <td className="col-attachment">
                     {(canModify(t) || t.attachment_path) && (
+                      <button
+                        className={`icon-btn ${t.attachment_path ? 'icon-attachment-on' : ''}`}
+                        title={uploadingId === t.id
+                          ? 'Uploading…'
+                          : t.attachment_path ? 'Click to View Attachment' : 'Attach a file'}
+                        aria-label={t.attachment_path ? 'View attachment' : 'Attach a file'}
+                        disabled={uploadingId === t.id}
+                        onClick={() => openAttachment(t)}
+                      >
+                        {t.attachment_path ? (
+                          <span className="icon-doc-img" aria-hidden="true" />
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
+                  </td>
+                )}
+                {!showDeleted && (
+                  <td className="col-actions">
+                    {canModify(t) && (
                       <div className="row-actions">
-                        <button
-                          className={`icon-btn ${t.attachment_path ? 'icon-attachment-on' : ''}`}
-                          title={uploadingId === t.id
-                            ? 'Uploading…'
-                            : t.attachment_path ? 'Click to View Attachment' : 'Attach a file'}
-                          aria-label={t.attachment_path ? 'View attachment' : 'Attach a file'}
-                          disabled={uploadingId === t.id}
-                          onClick={() => openAttachment(t)}
-                        >
-                          {t.attachment_path ? (
-                            <span className="icon-doc-img" aria-hidden="true" />
-                          ) : (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                            </svg>
-                          )}
-                        </button>
-                        {canModify(t) && !expired && (
+                        {!expired && (
                           <button className="icon-btn" title="Edit task" aria-label="Edit task" onClick={() => onEdit(t)}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
                             </svg>
                           </button>
                         )}
-                        {canModify(t) && (
-                          <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => onDelete(t)}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
-                            </svg>
-                          </button>
-                        )}
+                        <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => onDelete(t)}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
+                          </svg>
+                        </button>
                       </div>
                     )}
                   </td>

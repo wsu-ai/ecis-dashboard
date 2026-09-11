@@ -136,7 +136,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table tr.expired .icon-btn:hover{background:rgba(255,255,255,.18);color:#fff}
 
 /* ── 행 끝 첨부/수정/삭제 아이콘 버튼 ── */
-.task-table th.col-actions,.task-table td.col-actions{width:110px;padding-left:6px;text-align:center;white-space:nowrap}
+.task-table th.col-attachment,.task-table td.col-attachment{width:96px;text-align:center;white-space:nowrap}
+.task-table th.col-actions,.task-table td.col-actions{width:78px;padding-left:6px;text-align:center;white-space:nowrap}
 .row-actions{display:inline-flex;gap:2px}
 .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:none;background:none;border-radius:7px;color:var(--gray)}
 .icon-btn:hover{background:var(--panel);color:var(--ink)}
