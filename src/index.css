@@ -145,6 +145,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .icon-btn.icon-attachment-on{color:#1E63C7}
 .icon-btn.icon-attachment-on:hover{background:rgba(30,99,199,.14);color:#1E63C7}
 .task-table tr.expired .icon-attachment-on{color:#9CC6FF}
+/* 업로드된 문서 아이콘 이미지: currentColor로 물들여 상태색(파랑/만료 회색 등)을 그대로 따라간다 */
+.icon-doc-img{
+  display:inline-block;width:16px;height:16px;background-color:currentColor;
+  -webkit-mask:url(/document-icon.png) center/contain no-repeat;
+  mask:url(/document-icon.png) center/contain no-repeat;
+  -webkit-mask-mode:alpha;mask-mode:alpha;
+}
 
 /* ── 우선순위: 색 원 + 행 배경 ── */
 .task-table th.col-prio,.task-table td.col-prio{text-align:center;width:60px;white-space:nowrap}
