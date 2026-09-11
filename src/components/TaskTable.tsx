@@ -99,8 +99,7 @@ export default function TaskTable({
     pendingTaskId.current = null
     if (!file || !taskId) return
     if (!isAsciiFileName(file.name)) {
-      alert('The file name contains non-English characters (e.g. Korean, accented letters, or emoji). '
-        + 'Please rename the file using only plain ASCII characters (English letters, numbers, spaces, - and _) and try again.')
+      alert('File name contains invalid characters.  It must be of only valid ASCII character.')
       return
     }
     setUploadingId(taskId)
