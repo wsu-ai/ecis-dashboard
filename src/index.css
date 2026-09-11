@@ -147,7 +147,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table tr.expired .icon-attachment-on{color:#9CC6FF}
 /* 업로드된 문서 아이콘 이미지: currentColor로 물들여 상태색(파랑/만료 회색 등)을 그대로 따라간다 */
 .icon-doc-img{
-  display:inline-block;width:22px;height:22px;background-color:currentColor;
+  display:inline-block;width:27px;height:27px;background-color:currentColor;
   -webkit-mask:url(/document-icon.png) center/contain no-repeat;
   mask:url(/document-icon.png) center/contain no-repeat;
   -webkit-mask-mode:alpha;mask-mode:alpha;
