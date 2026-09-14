@@ -81,12 +81,16 @@ export default function TaskCalendar({
               {dayTasks.length > 0 && (
                 <div className="cal-dots" title={dayTasks.map((t) => `• ${t.title}`).join('\n')}>
                   {dayTasks.slice(0, 4).map((t) => (
-                    <button
-                      key={t.id}
-                      className={`cal-dot ${isExpired(t) ? 'cal-dot-expired' : `prio-${effectivePriority(t).toLowerCase()}`}`}
-                      onClick={() => onSelectTask(t)}
-                      aria-label={t.title}
-                    />
+                    t.task_type === 'Meeting' ? (
+                      <button key={t.id} className="cal-star" onClick={() => onSelectTask(t)} aria-label={t.title}>★</button>
+                    ) : (
+                      <button
+                        key={t.id}
+                        className={`cal-dot ${isExpired(t) ? 'cal-dot-expired' : `prio-${effectivePriority(t).toLowerCase()}`}`}
+                        onClick={() => onSelectTask(t)}
+                        aria-label={t.title}
+                      />
+                    )
                   ))}
                   {dayTasks.length > 4 && <span className="cal-more">+{dayTasks.length - 4}</span>}
                 </div>

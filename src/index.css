@@ -93,6 +93,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .cal-dot.prio-medium{background:#E8B004}
 .cal-dot.prio-low{background:#3FA45B}
 .cal-dot.cal-dot-expired{background:#6F6E68}
+.cal-star{display:inline-flex;align-items:center;justify-content:center;width:10px;height:10px;border:none;background:none;padding:0;font-size:11px;line-height:1;color:#4FA8E0;cursor:pointer}
+.star-icon{color:#4FA8E0}
 .cal-more{font-size:9px;color:var(--gray);line-height:1}
 .cal-note{margin:8px 0 0;font-size:11px;color:var(--faint);text-align:center}
 

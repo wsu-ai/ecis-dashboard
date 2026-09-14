@@ -18,7 +18,7 @@ export default function TodayMeetings({
 
   return (
     <div className="today-meetings">
-      <h3 className="today-meetings-title">Today's Meetings</h3>
+      <h3 className="today-meetings-title">Today's Meetings <span className="star-icon">★</span></h3>
       {meetings.length === 0 ? (
         <p className="hint">No meetings today.</p>
       ) : (
