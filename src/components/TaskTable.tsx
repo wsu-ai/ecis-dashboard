@@ -60,12 +60,13 @@ export function sortTasks(rows: TaskWithOwner[], dueSortDir: 'asc' | 'desc' = 'a
 }
 
 export default function TaskTable({
-  rows, showDeleted, canModify, onEdit, onDelete, onRefresh,
+  rows, showDeleted, canModify, canEdit, onEdit, onDelete, onRefresh,
   hideOwner = false, hideStatus = false, hideEnterDate = false, dueSortDir = 'asc',
 }: {
   rows: TaskWithOwner[]
   showDeleted: boolean
-  canModify: (t: TaskWithOwner) => boolean
+  canModify: (t: TaskWithOwner) => boolean // 삭제 권한
+  canEdit?: (t: TaskWithOwner) => boolean // 수정 권한, 생략 시 canModify와 동일
   onEdit: (t: TaskWithOwner) => void
   onDelete: (t: TaskWithOwner) => void
   onRefresh: () => void | Promise<void>
@@ -74,6 +75,7 @@ export default function TaskTable({
   hideEnterDate?: boolean
   dueSortDir?: 'asc' | 'desc'
 }) {
+  const canEditFn = canEdit ?? canModify
   const sorted = useMemo(() => sortTasks(rows, dueSortDir), [rows, dueSortDir])
   const baseColCount = 9 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
   const colCount = baseColCount + (showDeleted ? 1 : 2)
@@ -88,7 +90,7 @@ export default function TaskTable({
       getAttachmentUrl(t.attachment_path)
         .then((url) => window.open(url, '_blank', 'noopener,noreferrer'))
         .catch((e: any) => alert(e?.message || 'Failed to open the attachment.'))
-    } else if (canModify(t)) {
+    } else if (canEditFn(t)) {
       pendingTaskId.current = t.id
       fileInputRef.current?.click()
     }
@@ -177,7 +179,7 @@ export default function TaskTable({
                 {showDeleted && <td className="col-deleted">{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 {!showDeleted && (
                   <td className="col-attachment">
-                    {(canModify(t) || t.attachment_path) && (
+                    {(canEditFn(t) || t.attachment_path) && (
                       <button
                         className={`icon-btn ${t.attachment_path ? 'icon-attachment-on' : ''}`}
                         title={uploadingId === t.id
@@ -200,20 +202,22 @@ export default function TaskTable({
                 )}
                 {!showDeleted && (
                   <td className="col-actions">
-                    {canModify(t) && (
+                    {(canEditFn(t) || canModify(t)) && (
                       <div className="row-actions">
-                        {!expired && (
+                        {canEditFn(t) && !expired && (
                           <button className="icon-btn" title="Edit task" aria-label="Edit task" onClick={() => onEdit(t)}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
                             </svg>
                           </button>
                         )}
-                        <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => onDelete(t)}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
-                          </svg>
-                        </button>
+                        {canModify(t) && (
+                          <button className="icon-btn" title="Delete task" aria-label="Delete task" onClick={() => onDelete(t)}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
+                            </svg>
+                          </button>
+                        )}
                       </div>
                     )}
                   </td>

@@ -4,10 +4,11 @@ import type { Profile, TaskWithOwner } from '../lib/types'
 import { formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 import TaskTable, { isExpired } from '../components/TaskTable'
+import MeetingsTable from '../components/MeetingsTable'
 import TaskCalendar from '../components/TaskCalendar'
 import TodayMeetings from '../components/TodayMeetings'
 
-type View = 'all' | 'expired' | 'deleted'
+type View = 'all' | 'expired' | 'deleted' | 'meetings'
 
 export default function Dashboard({ profile }: { profile: Profile }) {
   const [tasks, setTasks] = useState<TaskWithOwner[]>([])
@@ -45,6 +46,9 @@ export default function Dashboard({ profile }: { profile: Profile }) {
 
   const visible = useMemo(
     () => tasks.filter((t) => {
+      if (view === 'meetings') {
+        return t.task_type === 'Meeting' && !t.deleted_at
+      }
       if (t.task_type === 'Meeting') return false
       if (view === 'deleted') { if (!t.deleted_at) return false }
       else if (t.deleted_at) return false
@@ -59,8 +63,10 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   // 달력에는 삭제되지 않은 모든 업무를 표시한다
   const activeTasks = useMemo(() => tasks.filter((t) => !t.deleted_at), [tasks])
 
-  // 본인이 등록한 업무이거나 관리자면 수정/삭제 가능
+  // 본인이 등록한 업무이거나 관리자면 삭제 가능
   const canModify = (t: TaskWithOwner) => t.owner_id === profile.id || profile.is_admin
+  // 미팅은 로그인한 누구나 수정 가능, 그 외 업무는 소유자/관리자만
+  const canEdit = (t: TaskWithOwner) => t.task_type === 'Meeting' || canModify(t)
 
   function openCreate() { setEditing(null); setModalOpen(true) }
   function openEdit(t: TaskWithOwner) { setEditing(t); setModalOpen(true) }
@@ -88,15 +94,18 @@ export default function Dashboard({ profile }: { profile: Profile }) {
             <div className="dash-tabs">
               <button className={view === 'all' ? 'on' : ''} onClick={() => setView('all')}>Active Tasks</button>
               <button className={view === 'expired' ? 'on' : ''} onClick={() => setView('expired')}>Expired Tasks</button>
+              <button className={view === 'meetings' ? 'on' : ''} onClick={() => setView('meetings')}>Meetings</button>
               <button className={view === 'deleted' ? 'on' : ''} onClick={() => setView('deleted')}>Deleted Tasks</button>
             </div>
-            <label className="dept-filter">
-              <span>Show Tasks From:&nbsp;</span>
-              <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
-                <option value="All">All</option>
-                {departments.map((d) => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </label>
+            {view !== 'meetings' && (
+              <label className="dept-filter">
+                <span>Show Tasks From:&nbsp;</span>
+                <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}>
+                  <option value="All">All</option>
+                  {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </label>
+            )}
           </div>
           <div className="dash-toolbar-actions">
             <button className="primary" onClick={openCreate}>New Task+</button>
@@ -112,17 +121,27 @@ export default function Dashboard({ profile }: { profile: Profile }) {
         {err && <p className="hint err">{err}</p>}
 
         {!loading && !err && (
-          <TaskTable
-            rows={visible}
-            showDeleted={view === 'deleted'}
-            hideStatus={view === 'all'}
-            hideEnterDate={view === 'all'}
-            dueSortDir={view === 'expired' ? 'desc' : 'asc'}
-            canModify={canModify}
-            onEdit={openEdit}
-            onDelete={remove}
-            onRefresh={load}
-          />
+          view === 'meetings' ? (
+            <MeetingsTable
+              rows={visible}
+              canModify={canModify}
+              onEdit={openEdit}
+              onDelete={remove}
+            />
+          ) : (
+            <TaskTable
+              rows={visible}
+              showDeleted={view === 'deleted'}
+              hideStatus={view === 'all'}
+              hideEnterDate={view === 'all'}
+              dueSortDir={view === 'expired' ? 'desc' : 'asc'}
+              canModify={canModify}
+              canEdit={canEdit}
+              onEdit={openEdit}
+              onDelete={remove}
+              onRefresh={load}
+            />
+          )
         )}
 
         {modalOpen && (

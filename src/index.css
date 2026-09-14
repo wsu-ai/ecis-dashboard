@@ -159,7 +159,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:none;background:none;border-radius:7px;color:var(--gray)}
 .icon-btn:hover{background:var(--panel);color:var(--ink)}
 .icon-btn:disabled{opacity:.5;cursor:default}
-.icon-btn[aria-label="Delete task"]:hover{background:rgba(200,69,59,.12);color:var(--live)}
+.icon-btn[aria-label="Delete task"]:hover,.icon-btn[aria-label="Delete meeting"]:hover{background:rgba(200,69,59,.12);color:var(--live)}
+
+/* ── Meetings 탭 전용 표: 제목 / 시간 / 장소만 ── */
+.meetings-table th.col-mtitle,.meetings-table td.col-mtitle{width:40%}
+.meetings-table th.col-mtime,.meetings-table td.col-mtime{width:170px;white-space:nowrap}
+.meetings-table tbody tr.meetings-row{cursor:pointer}
+.meetings-table tbody tr.meetings-row:hover td{background:var(--panel)}
+.meetings-table th{background:#CFE8FF;color:#0D2C4D}
 .icon-btn.icon-attachment-on{color:#1E63C7}
 .icon-btn.icon-attachment-on:hover{background:rgba(30,99,199,.14);color:#1E63C7}
 .task-table tr.expired .icon-attachment-on{color:#9CC6FF}

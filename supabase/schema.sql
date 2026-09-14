@@ -90,6 +90,15 @@ create policy "tasks_update_admin" on tasks
   using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin))
   with check (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin));
 
+-- 미팅(task_type='Meeting')은 로그인한 누구나 내용을 수정할 수 있다.
+-- with check도 'Meeting'으로 제한해서, 소유자/관리자가 아닌 사람이 이 정책을 이용해
+-- 업무 유형을 'Task'로 바꿔치기하는 것은 막는다.
+drop policy if exists "tasks_update_meeting_any" on tasks;
+create policy "tasks_update_meeting_any" on tasks
+  for update
+  using (task_type = 'Meeting')
+  with check (task_type = 'Meeting');
+
 -- DELETE 정책을 아예 만들지 않음 = RLS 기본값(전체 거부)으로 실제 삭제 완전 차단
 
 
