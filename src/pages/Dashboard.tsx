@@ -94,8 +94,8 @@ export default function Dashboard({ profile }: { profile: Profile }) {
             <div className="dash-tabs">
               <button className={view === 'all' ? 'on' : ''} onClick={() => setView('all')}>Active Tasks</button>
               <button className={view === 'expired' ? 'on' : ''} onClick={() => setView('expired')}>Expired Tasks</button>
-              <button className={view === 'meetings' ? 'on' : ''} onClick={() => setView('meetings')}>Meetings</button>
               <button className={view === 'deleted' ? 'on' : ''} onClick={() => setView('deleted')}>Deleted Tasks</button>
+              <button className={view === 'meetings' ? 'on' : ''} onClick={() => setView('meetings')}>Meetings</button>
             </div>
             {view !== 'meetings' && (
               <label className="dept-filter">
