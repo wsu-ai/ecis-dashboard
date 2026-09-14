@@ -25,8 +25,23 @@ export type TaskInput = {
   required_documents: string
   status: Task['status']
   priority: Task['priority']
+  task_type: Task['task_type']
   task_date: string // "YYYY-MM-DD", '' 허용(미정)
-  due_date: string // "YYYY-MM-DD HH:MM AM" (로컬 시간), '' 허용(미정)
+  due_date: string // "YYYY-MM-DD HH:MM AM" (로컬 시간), '' 허용(미정) — 미팅이면 "Meeting Date & Time"
+  meeting_location: string
+  meeting_duration: string
+}
+
+// Task 타입일 때는 미팅 전용 필드를 비워서 저장한다(폼에서 숨겨졌다가 남은 값 방지)
+function normalizeInput(input: TaskInput) {
+  const isMeeting = input.task_type === 'Meeting'
+  return {
+    ...input,
+    task_date: input.task_date || null,
+    due_date: parseDueInput(input.due_date),
+    meeting_location: isMeeting ? input.meeting_location : '',
+    meeting_duration: isMeeting ? input.meeting_duration : '',
+  }
 }
 
 // "YYYY-MM-DD HH:MM AM" (로컬 시간) → timestamptz용 ISO 문자열.
@@ -51,9 +66,7 @@ export function isDueInputValid(v: string): boolean {
 export async function createTask(ownerId: string, input: TaskInput) {
   const { error } = await supabase.from('tasks').insert({
     owner_id: ownerId,
-    ...input,
-    task_date: input.task_date || null,
-    due_date: parseDueInput(input.due_date),
+    ...normalizeInput(input),
   })
   if (error) throw error
 }
@@ -61,7 +74,7 @@ export async function createTask(ownerId: string, input: TaskInput) {
 export async function updateTask(id: string, input: TaskInput) {
   const { error } = await supabase
     .from('tasks')
-    .update({ ...input, task_date: input.task_date || null, due_date: parseDueInput(input.due_date) })
+    .update(normalizeInput(input))
     .eq('id', id)
   if (error) throw error
 }

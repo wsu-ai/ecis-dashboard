@@ -45,8 +45,8 @@ function sortRank(t: TaskWithOwner): number {
   return PRIO_RANK[effectivePriority(t)] + 1
 }
 
-// 정렬: 1) 만료 → High → Medium → Low, 2) 같은 카테고리는 마감일이 가까운 순(오름차순, 마감일 없으면 맨 뒤)
-export function sortTasks(rows: TaskWithOwner[]): TaskWithOwner[] {
+// 정렬: 1) 만료 → High → Medium → Low, 2) 같은 카테고리는 마감일 순(기본은 오름차순=가까운 날짜 먼저, 마감일 없으면 항상 맨 뒤)
+export function sortTasks(rows: TaskWithOwner[], dueSortDir: 'asc' | 'desc' = 'asc'): TaskWithOwner[] {
   return [...rows].sort((a, b) => {
     const r = sortRank(a) - sortRank(b)
     if (r !== 0) return r
@@ -55,13 +55,13 @@ export function sortTasks(rows: TaskWithOwner[]): TaskWithOwner[] {
     if (ta === null && tb === null) return 0
     if (ta === null) return 1
     if (tb === null) return -1
-    return ta - tb // 마감일 오름차순 (가까운 날짜 먼저)
+    return dueSortDir === 'asc' ? ta - tb : tb - ta
   })
 }
 
 export default function TaskTable({
   rows, showDeleted, canModify, onEdit, onDelete, onRefresh,
-  hideOwner = false, hideStatus = false, hideEnterDate = false,
+  hideOwner = false, hideStatus = false, hideEnterDate = false, dueSortDir = 'asc',
 }: {
   rows: TaskWithOwner[]
   showDeleted: boolean
@@ -72,8 +72,9 @@ export default function TaskTable({
   hideOwner?: boolean
   hideStatus?: boolean
   hideEnterDate?: boolean
+  dueSortDir?: 'asc' | 'desc'
 }) {
-  const sorted = useMemo(() => sortTasks(rows), [rows])
+  const sorted = useMemo(() => sortTasks(rows, dueSortDir), [rows, dueSortDir])
   const baseColCount = 9 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
   const colCount = baseColCount + (showDeleted ? 1 : 2)
 

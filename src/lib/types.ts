@@ -1,6 +1,7 @@
 export type Role = 'Faculty' | 'Assistant' | 'Staff'
 export type Status = 'Received' | 'In Progress' | 'Completed' | 'On Hold' | 'Expired'
 export type Priority = 'Low' | 'Medium' | 'High'
+export type TaskType = 'Task' | 'Meeting'
 
 export type Profile = {
   id: string
@@ -23,8 +24,11 @@ export type Task = {
   required_documents: string | null
   status: Status
   priority: Priority
+  task_type: TaskType
   task_date: string | null // YYYY-MM-DD (date)
-  due_date: string | null // ISO timestamp (timestamptz)
+  due_date: string | null // ISO timestamp (timestamptz) — 미팅의 경우 "Meeting Date & Time"으로도 쓰인다
+  meeting_location: string | null
+  meeting_duration: string | null
   attachment_path: string | null // Storage 객체 경로 (task-attachments 버킷)
   attachment_name: string | null // 업로드 당시 원본 파일명
   deleted_at: string | null

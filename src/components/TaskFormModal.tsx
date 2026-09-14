@@ -18,8 +18,9 @@ function newInput(): TaskInput {
   return {
     title: '', description: '', requesting_org: '', requesting_org_id: '',
     submission_method: '', contact_info: '', required_documents: '',
-    status: 'Received', priority: 'Medium',
+    status: 'Received', priority: 'Medium', task_type: 'Task',
     task_date: todayDate(), due_date: defaultDueDate(),
+    meeting_location: 'W19-219', meeting_duration: '1',
   }
 }
 
@@ -29,9 +30,10 @@ function inputFromTask(t: Task): TaskInput {
     requesting_org: t.requesting_org ?? '', requesting_org_id: t.requesting_org_id ?? '',
     submission_method: t.submission_method ?? '', contact_info: t.contact_info ?? '',
     required_documents: t.required_documents ?? '',
-    status: t.status, priority: t.priority,
+    status: t.status, priority: t.priority, task_type: t.task_type ?? 'Task',
     task_date: t.task_date ?? '',
     due_date: t.due_date ? formatDueDate(t.due_date) : '',
+    meeting_location: t.meeting_location ?? '', meeting_duration: t.meeting_duration ?? '',
   }
 }
 
@@ -49,7 +51,8 @@ export default function TaskFormModal({
   async function save() {
     if (!input.title.trim()) return
     if (!isDueInputValid(input.due_date)) {
-      alert(`Due Date & Time must be in the format "${DUE_FORMAT}" (e.g. 2026-09-08 11:59 PM).`)
+      const label = input.task_type === 'Meeting' ? 'Meeting Date & Time' : 'Due Date & Time'
+      alert(`${label} must be in the format "${DUE_FORMAT}" (e.g. 2026-09-08 11:59 PM).`)
       return
     }
     setSaving(true)
@@ -74,67 +77,108 @@ export default function TaskFormModal({
           <span>Title *</span>
           <input value={input.title} onChange={(e) => setInput({ ...input, title: e.target.value })} />
         </label>
+
+        <div className="field radio-row">
+          <span>Type</span>
+          <div className="radio-options">
+            <label>
+              <input type="radio" name="task_type" value="Task"
+                checked={input.task_type === 'Task'}
+                onChange={() => setInput({ ...input, task_type: 'Task' })} />
+              Task
+            </label>
+            <label>
+              <input type="radio" name="task_type" value="Meeting"
+                checked={input.task_type === 'Meeting'}
+                onChange={() => setInput({ ...input, task_type: 'Meeting' })} />
+              Meeting
+            </label>
+          </div>
+        </div>
+
         <label className="field">
           <span>Description</span>
           <textarea value={input.description} onChange={(e) => setInput({ ...input, description: e.target.value })} rows={3} />
         </label>
 
-        <div className="field-row">
-          <label className="field">
-            <span>Requesting Department</span>
-            <input value={input.requesting_org} onChange={(e) => setInput({ ...input, requesting_org: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>Reference No.</span>
-            <input value={input.requesting_org_id} onChange={(e) => setInput({ ...input, requesting_org_id: e.target.value })} placeholder="e.g. Faculty-Affairs-2442" />
-          </label>
-        </div>
+        {input.task_type === 'Meeting' ? (
+          <>
+            <div className="field-row">
+              <label className="field">
+                <span>Meeting Date &amp; Time</span>
+                <input type="text" placeholder={DUE_FORMAT} value={input.due_date}
+                  onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
+              </label>
+              <label className="field">
+                <span>Duration (hour)</span>
+                <input value={input.meeting_duration} onChange={(e) => setInput({ ...input, meeting_duration: e.target.value })} placeholder="e.g. 1" />
+              </label>
+            </div>
+            <label className="field">
+              <span>Meeting Location</span>
+              <input value={input.meeting_location} onChange={(e) => setInput({ ...input, meeting_location: e.target.value })} placeholder="e.g. Room 302, Zoom link" />
+            </label>
+          </>
+        ) : (
+          <>
+            <div className="field-row">
+              <label className="field">
+                <span>Requesting Department</span>
+                <input value={input.requesting_org} onChange={(e) => setInput({ ...input, requesting_org: e.target.value })} />
+              </label>
+              <label className="field">
+                <span>Reference No.</span>
+                <input value={input.requesting_org_id} onChange={(e) => setInput({ ...input, requesting_org_id: e.target.value })} placeholder="e.g. Faculty-Affairs-2442" />
+              </label>
+            </div>
 
-        <label className="field">
-          <span>Submission Method</span>
-          <input value={input.submission_method} onChange={(e) => setInput({ ...input, submission_method: e.target.value })} placeholder="e.g. Email, online portal upload, etc." />
-        </label>
-        <label className="field">
-          <span>Contact Info</span>
-          <input value={input.contact_info} onChange={(e) => setInput({ ...input, contact_info: e.target.value })} placeholder="e.g. contact name, phone, email" />
-        </label>
-        <label className="field">
-          <span>Required Documents</span>
-          <input value={input.required_documents} onChange={(e) => setInput({ ...input, required_documents: e.target.value })} placeholder="e.g. employment certificate, consent form" />
-        </label>
+            <label className="field">
+              <span>Submission Method</span>
+              <input value={input.submission_method} onChange={(e) => setInput({ ...input, submission_method: e.target.value })} placeholder="e.g. Email, online portal upload, etc." />
+            </label>
+            <label className="field">
+              <span>Contact Info</span>
+              <input value={input.contact_info} onChange={(e) => setInput({ ...input, contact_info: e.target.value })} placeholder="e.g. contact name, phone, email" />
+            </label>
+            <label className="field">
+              <span>Required Documents</span>
+              <input value={input.required_documents} onChange={(e) => setInput({ ...input, required_documents: e.target.value })} placeholder="e.g. employment certificate, consent form" />
+            </label>
 
-        <div className="field-row">
-          <label className="field">
-            <span>Status</span>
-            <select value={input.status} onChange={(e) => setInput({ ...input, status: e.target.value as TaskInput['status'] })}>
-              <option value="Received">Received</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-              <option value="On Hold">On Hold</option>
-              <option value="Expired">Expired</option>
-            </select>
-          </label>
-          <label className="field">
-            <span>Priority</span>
-            <select value={input.priority} onChange={(e) => setInput({ ...input, priority: e.target.value as TaskInput['priority'] })}>
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
-          </label>
-        </div>
+            <div className="field-row">
+              <label className="field">
+                <span>Status</span>
+                <select value={input.status} onChange={(e) => setInput({ ...input, status: e.target.value as TaskInput['status'] })}>
+                  <option value="Received">Received</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                  <option value="On Hold">On Hold</option>
+                  <option value="Expired">Expired</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>Priority</span>
+                <select value={input.priority} onChange={(e) => setInput({ ...input, priority: e.target.value as TaskInput['priority'] })}>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </label>
+            </div>
 
-        <div className="field-row">
-          <label className="field">
-            <span>Task Date</span>
-            <input type="date" value={input.task_date} onChange={(e) => setInput({ ...input, task_date: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>Due Date &amp; Time</span>
-            <input type="text" placeholder={DUE_FORMAT} value={input.due_date}
-              onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
-          </label>
-        </div>
+            <div className="field-row">
+              <label className="field">
+                <span>Task Date</span>
+                <input type="date" value={input.task_date} onChange={(e) => setInput({ ...input, task_date: e.target.value })} />
+              </label>
+              <label className="field">
+                <span>Due Date &amp; Time</span>
+                <input type="text" placeholder={DUE_FORMAT} value={input.due_date}
+                  onChange={(e) => setInput({ ...input, due_date: e.target.value })} />
+              </label>
+            </div>
+          </>
+        )}
 
         <div className="modal-actions">
           <button className="ghost" onClick={onClose}>Cancel</button>

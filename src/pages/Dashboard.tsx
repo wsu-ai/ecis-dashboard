@@ -5,6 +5,7 @@ import { formatRefreshed } from '../lib/format'
 import TaskFormModal from '../components/TaskFormModal'
 import TaskTable, { isExpired } from '../components/TaskTable'
 import TaskCalendar from '../components/TaskCalendar'
+import TodayMeetings from '../components/TodayMeetings'
 
 type View = 'all' | 'expired' | 'deleted'
 
@@ -44,6 +45,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
 
   const visible = useMemo(
     () => tasks.filter((t) => {
+      if (t.task_type === 'Meeting') return false
       if (view === 'deleted') { if (!t.deleted_at) return false }
       else if (t.deleted_at) return false
       if (view === 'all' && isExpired(t)) return false
@@ -77,6 +79,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
     <div className="dash dash-layout">
       <aside className="dash-cal">
         <TaskCalendar tasks={activeTasks} onSelectTask={openEdit} />
+        <TodayMeetings tasks={activeTasks} onSelect={openEdit} />
       </aside>
 
       <div className="dash-main">
@@ -114,6 +117,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
             showDeleted={view === 'deleted'}
             hideStatus={view === 'all'}
             hideEnterDate={view === 'all'}
+            dueSortDir={view === 'expired' ? 'desc' : 'asc'}
             canModify={canModify}
             onEdit={openEdit}
             onDelete={remove}

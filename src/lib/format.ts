@@ -48,6 +48,14 @@ export function formatDueMDY(iso: string): string {
   return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()} ${pad(h)}:${pad(d.getMinutes())} ${ampm}`
 }
 
+// ISO 타임스탬프 → "HH:MM AM" (뷰어의 로컬 시간대 기준)
+export function formatTimeOnly(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  const [ampm, h] = clock12(d)
+  return `${pad(h)}:${pad(d.getMinutes())} ${ampm}`
+}
+
 function clock12(d: Date): [string, number] {
   const ampm = d.getHours() < 12 ? 'AM' : 'PM'
   let h = d.getHours() % 12

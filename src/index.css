@@ -32,6 +32,9 @@ h1,h2{margin:0}
 .field>span .label-note{font-weight:400}
 .field-row{display:flex;gap:12px}
 .field-row .field{flex:1}
+.radio-options{display:flex;gap:20px;align-items:center;height:44px}
+.radio-options label{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:400;color:var(--ink);cursor:pointer}
+.radio-options input[type="radio"]{width:auto;height:auto;padding:0;border:none;accent-color:var(--teal);cursor:pointer}
 input,select,textarea{height:44px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-size:14px;font-family:var(--font);color:var(--ink);background:#fff;width:100%}
 textarea{height:auto;padding:10px 12px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);box-shadow:0 0 0 3px rgba(15,110,86,.12)}
@@ -69,7 +72,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 }
 
 /* ── 달력 ── */
-.cal{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px}
+.cal{background:#fff;border:1px solid #1E3A5F;border-radius:12px;padding:12px;box-shadow:0 6px 16px rgba(40,38,30,.14)}
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .cal-title{font-weight:700;font-size:14px;color:var(--ink)}
 .cal-nav{width:28px;height:28px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:15px;line-height:1;color:var(--ink)}
@@ -92,6 +95,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .cal-dot.cal-dot-expired{background:#6F6E68}
 .cal-more{font-size:9px;color:var(--gray);line-height:1}
 .cal-note{margin:8px 0 0;font-size:11px;color:var(--faint);text-align:center}
+
+/* ── 오늘의 미팅 목록 (달력 아래) ── */
+.today-meetings{background:#fff;border:1px solid #1E3A5F;border-radius:12px;padding:12px;margin-top:16px;box-shadow:0 6px 16px rgba(40,38,30,.14)}
+.today-meetings-title{font-size:14px;font-weight:700;color:var(--ink);margin:0 0 10px;text-align:center}
+.today-meetings-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.today-meetings-table th{text-align:left;font-size:11px;font-weight:700;color:var(--gray);padding:0 4px 6px;border-bottom:1px solid var(--border)}
+.today-meetings-table td{padding:6px 4px;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
+.today-meetings-table tbody tr:last-child td{border-bottom:none}
+.today-meetings-table tbody tr{cursor:pointer}
+.today-meetings-table tbody tr:hover td{background:var(--panel)}
+.today-meetings-table th:nth-child(2),.today-meetings-table td:nth-child(2){width:76px;white-space:nowrap}
+.today-meetings-table th.today-meetings-name,.today-meetings-table td.today-meetings-name{width:52%;font-weight:700;color:var(--ink)}
 
 .dash-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
 .dash-toolbar-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}

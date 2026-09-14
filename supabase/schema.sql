@@ -44,8 +44,12 @@ create table if not exists tasks (
 
   status text not null default 'Received' check (status in ('Received', 'In Progress', 'Completed', 'On Hold', 'Expired')),
   priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High')),
+  task_type text not null default 'Task' check (task_type in ('Task', 'Meeting')),
   task_date date,        -- 업무 일자 (사용자가 등록 시 입력)
-  due_date timestamptz,   -- 마감 일시
+  due_date timestamptz,   -- 마감 일시 (미팅이면 "Meeting Date & Time"으로 쓰인다)
+
+  meeting_location text,  -- 미팅 장소 (task_type = 'Meeting'일 때만 사용)
+  meeting_duration text,  -- 미팅 소요 시간 (예: "1 hour")
 
   attachment_path text,  -- Storage 객체 경로 (task-attachments 버킷)
   attachment_name text,  -- 업로드 당시 원본 파일명
