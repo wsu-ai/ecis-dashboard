@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import type { Priority, TaskWithOwner } from '../lib/types'
-import { formatDateMDY, formatDueMDY } from '../lib/format'
+import { formatDateMDY, formatDueMDY, formatDueSmart } from '../lib/format'
 import { ATTACHMENT_ACCEPT, getAttachmentUrl, isAsciiFileName, uploadTaskAttachment } from '../lib/attachments'
 import { setTaskAttachment } from '../lib/tasks'
 
@@ -173,7 +173,7 @@ export default function TaskTable({
                   <td className="col-center col-owner">{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                 )}
                 {!hideStatus && <td className="col-center col-status">{t.status}</td>}
-                <td className="col-due">{t.due_date ? formatDueMDY(t.due_date) : 'TBD'}</td>
+                <td className="col-due">{t.due_date ? formatDueSmart(t.due_date) : 'TBD'}</td>
                 <td className="col-center col-taskdate">{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
                 {!hideEnterDate && <td className="col-enterdate">{formatDueMDY(t.created_at)}</td>}
                 {showDeleted && <td className="col-deleted">{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}

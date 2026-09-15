@@ -48,6 +48,16 @@ export function formatDueMDY(iso: string): string {
   return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()} ${pad(h)}:${pad(d.getMinutes())} ${ampm}`
 }
 
+// ISO 타임스탬프 → "MM/DD/YYYY HH:MM AM", 단 시간이 11:59 PM(마감시간 기본값)이면 날짜만 표시
+export function formatDueSmart(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  if (d.getHours() === 23 && d.getMinutes() === 59) {
+    return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`
+  }
+  return formatDueMDY(iso)
+}
+
 // ISO 타임스탬프 → "HH:MM AM" (뷰어의 로컬 시간대 기준)
 export function formatTimeOnly(iso: string): string {
   const d = new Date(iso)
