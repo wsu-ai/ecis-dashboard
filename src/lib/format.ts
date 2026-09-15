@@ -55,14 +55,14 @@ export function isDueTimeDefault(iso: string): boolean {
   return d.getHours() === 23 && d.getMinutes() === 59
 }
 
-// ISO 타임스탬프 → "MM/DD/YYYY HH:MM AM", 단 시간이 11:59 PM(마감시간 기본값)이면 날짜만 표시
-export function formatDueSmart(iso: string): string {
+// ISO 타임스탬프 → 날짜, 시간(마감시간 기본값인 11:59 PM이면 null)으로 분리
+export function formatDueParts(iso: string): { date: string; time: string | null } {
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return iso
-  if (isDueTimeDefault(iso)) {
-    return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`
-  }
-  return formatDueMDY(iso)
+  if (Number.isNaN(d.getTime())) return { date: iso, time: null }
+  const date = `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`
+  if (isDueTimeDefault(iso)) return { date, time: null }
+  const [ampm, h] = clock12(d)
+  return { date, time: `${pad(h)}:${pad(d.getMinutes())} ${ampm}` }
 }
 
 // ISO 타임스탬프 → "HH:MM AM" (뷰어의 로컬 시간대 기준)

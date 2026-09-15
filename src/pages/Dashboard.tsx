@@ -134,6 +134,8 @@ export default function Dashboard({ profile }: { profile: Profile }) {
               showDeleted={view === 'deleted'}
               hideStatus={view === 'all'}
               hideEnterDate={view === 'all'}
+              hidePriority={view === 'expired' || view === 'deleted'}
+              hideDays={view === 'expired' || view === 'deleted'}
               dueSortDir={view === 'expired' ? 'desc' : 'asc'}
               canModify={canModify}
               canEdit={canEdit}

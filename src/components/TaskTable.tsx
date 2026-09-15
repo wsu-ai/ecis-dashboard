@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import type { Priority, TaskWithOwner } from '../lib/types'
-import { formatDateMDY, formatDueMDY, formatDueSmart, isDueTimeDefault } from '../lib/format'
+import { formatDateMDY, formatDueMDY, formatDueParts } from '../lib/format'
 import { ATTACHMENT_ACCEPT, getAttachmentUrl, isAsciiFileName, uploadTaskAttachment } from '../lib/attachments'
 import { setTaskAttachment } from '../lib/tasks'
 
@@ -67,7 +67,7 @@ export function sortTasks(
 
 export default function TaskTable({
   rows, showDeleted, canModify, canEdit, onEdit, onDelete, onRefresh,
-  hideOwner = false, hideStatus = false, hideEnterDate = false, dueSortDir = 'asc',
+  hideOwner = false, hideStatus = false, hideEnterDate = false, hidePriority = false, hideDays = false, dueSortDir = 'asc',
   expiredAtBottom = false,
 }: {
   rows: TaskWithOwner[]
@@ -80,6 +80,8 @@ export default function TaskTable({
   hideOwner?: boolean
   hideStatus?: boolean
   hideEnterDate?: boolean
+  hidePriority?: boolean
+  hideDays?: boolean
   dueSortDir?: 'asc' | 'desc'
   expiredAtBottom?: boolean // true면 만료된 업무를 맨 아래에, 마감일 내림차순으로 표시
 }) {
@@ -88,7 +90,7 @@ export default function TaskTable({
     () => sortTasks(rows, dueSortDir, expiredAtBottom),
     [rows, dueSortDir, expiredAtBottom],
   )
-  const baseColCount = 9 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
+  const baseColCount = 9 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0) - (hidePriority ? 1 : 0) - (hideDays ? 1 : 0)
   const colCount = baseColCount + (showDeleted ? 1 : 2)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -134,20 +136,22 @@ export default function TaskTable({
       <table className="task-table">
         <thead>
           <tr>
-            <th className="col-prio">Priority</th>
-            <th className="col-days" title="Days remaining until the due date" aria-label="Days remaining until the due date">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7v5l3 2" />
-              </svg>
-            </th>
+            {!hidePriority && <th className="col-prio">Priority</th>}
+            {!hideDays && (
+              <th className="col-days" title="Days remaining until the due date" aria-label="Days remaining until the due date">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+              </th>
+            )}
             <th className="col-title">Task Title</th>
             <th className="col-center col-dept">Requesting Dept.</th>
             {!hideOwner && <th className="col-center col-owner">Entered By</th>}
             {!hideStatus && <th className="col-center col-status">Status</th>}
-            <th className="col-due">Due Date</th>
+            <th className="col-center col-due">Due Date</th>
             <th className="col-center col-taskdate">Task Registered Date</th>
-            {!hideEnterDate && <th className="col-enterdate">Enter Date</th>}
+            {!hideEnterDate && <th className="col-center col-enterdate">Enter Date</th>}
             {showDeleted && <th className="col-deleted">Deleted By / At</th>}
             {!showDeleted && <th className="col-attachment">Attachment</th>}
             {!showDeleted && <th className="col-actions" aria-label="Actions" />}
@@ -164,29 +168,36 @@ export default function TaskTable({
               <tr key={t.id}
                 className={expired ? 'expired' : prioClass(ep)}
                 title={t.description || undefined}>
-                <td className="col-prio">
-                  {expired ? null : ep === 'High' ? (
-                    <svg className="prio-flag" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                      role="img" aria-label="High">
-                      <title>High</title>
-                      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z" fill="currentColor" />
-                      <line x1="4" y1="22" x2="4" y2="15" />
-                    </svg>
-                  ) : (
-                    <span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} />
-                  )}
-                </td>
-                <td className="col-days">{expired ? 'Expired' : daysUntilDueLabel(t.due_date)}</td>
+                {!hidePriority && (
+                  <td className="col-prio">
+                    {expired ? null : ep === 'High' ? (
+                      <svg className="prio-flag" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        role="img" aria-label="High">
+                        <title>High</title>
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z" fill="currentColor" />
+                        <line x1="4" y1="22" x2="4" y2="15" />
+                      </svg>
+                    ) : (
+                      <span className={`prio-dot ${prioClass(ep)}`} title={ep} aria-label={ep} />
+                    )}
+                  </td>
+                )}
+                {!hideDays && <td className="col-days">{expired ? 'Expired' : daysUntilDueLabel(t.due_date)}</td>}
                 <td className="col-title">{t.title}</td>
                 <td className="col-center col-dept">{t.requesting_org || '-'}</td>
                 {!hideOwner && (
                   <td className="col-center col-owner">{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                 )}
                 {!hideStatus && <td className="col-center col-status">{t.status}</td>}
-                <td className={`col-due${t.due_date && isDueTimeDefault(t.due_date) ? ' col-center' : ''}`}>{t.due_date ? formatDueSmart(t.due_date) : 'TBD'}</td>
+                <td className="col-center col-due">
+                  {t.due_date ? (() => {
+                    const { date, time } = formatDueParts(t.due_date)
+                    return time ? <>{date}<br />{time}</> : date
+                  })() : 'TBD'}
+                </td>
                 <td className="col-center col-taskdate">{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
-                {!hideEnterDate && <td className="col-enterdate">{formatDueMDY(t.created_at)}</td>}
+                {!hideEnterDate && <td className="col-center col-enterdate">{formatDueMDY(t.created_at)}</td>}
                 {showDeleted && <td className="col-deleted">{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}
                 {!showDeleted && (
                   <td className="col-attachment">
