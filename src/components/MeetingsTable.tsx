@@ -1,7 +1,12 @@
 import { formatDueMDY } from '../lib/format'
 import type { TaskWithOwner } from '../lib/types'
 
+function hasPassed(t: TaskWithOwner): boolean {
+  return !!t.due_date && new Date(t.due_date).getTime() < Date.now()
+}
+
 // Meetings 탭 전용 표: 제목 / 시간 / 장소만 보여준다 (다른 탭의 전체 컬럼과 다름)
+// 정렬: 예정된 미팅이 먼저(가까운 순), 지난 미팅은 맨 아래로 내려가되 최근에 지난 순(내림차순)
 export default function MeetingsTable({
   rows, canModify, onEdit, onDelete,
 }: {
@@ -10,10 +15,14 @@ export default function MeetingsTable({
   onEdit: (t: TaskWithOwner) => void
   onDelete: (t: TaskWithOwner) => void
 }) {
+  const now = Date.now()
   const sorted = [...rows].sort((a, b) => {
     const ta = a.due_date ? new Date(a.due_date).getTime() : Infinity
     const tb = b.due_date ? new Date(b.due_date).getTime() : Infinity
-    return ta - tb
+    const aPast = ta < now
+    const bPast = tb < now
+    if (aPast !== bPast) return aPast ? 1 : -1
+    return aPast ? tb - ta : ta - tb
   })
 
   return (
@@ -32,7 +41,7 @@ export default function MeetingsTable({
             <tr><td colSpan={4} className="empty">No meetings to show.</td></tr>
           )}
           {sorted.map((m) => (
-            <tr key={m.id} className="meetings-row" onClick={() => onEdit(m)}>
+            <tr key={m.id} className={`meetings-row${hasPassed(m) ? ' meetings-row-past' : ''}`} onClick={() => onEdit(m)}>
               <td className="col-mtitle">{m.title}</td>
               <td className="col-mtime col-center">{m.due_date ? formatDueMDY(m.due_date) : 'TBD'}</td>
               <td className="col-center">{m.meeting_location || '-'}</td>

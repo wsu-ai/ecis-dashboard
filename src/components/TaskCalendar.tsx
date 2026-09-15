@@ -82,7 +82,7 @@ export default function TaskCalendar({
                 <div className="cal-dots" title={dayTasks.map((t) => `• ${t.title}`).join('\n')}>
                   {dayTasks.slice(0, 4).map((t) => (
                     t.task_type === 'Meeting' ? (
-                      <button key={t.id} className="cal-star" onClick={() => onSelectTask(t)} aria-label={t.title}>★</button>
+                      <button key={t.id} className={`cal-star ${isExpired(t) ? 'cal-star-passed' : ''}`} onClick={() => onSelectTask(t)} aria-label={t.title}>★</button>
                     ) : (
                       <button
                         key={t.id}

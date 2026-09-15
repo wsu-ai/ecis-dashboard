@@ -94,6 +94,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .cal-dot.prio-low{background:#3FA45B}
 .cal-dot.cal-dot-expired{background:#6F6E68}
 .cal-star{display:inline-flex;align-items:center;justify-content:center;width:10px;height:10px;border:none;background:none;padding:0;font-size:11px;line-height:1;color:#4FA8E0;cursor:pointer}
+.cal-star.cal-star-passed{color:#6F6E68}
 .star-icon{color:#4FA8E0}
 .cal-more{font-size:9px;color:var(--gray);line-height:1}
 .cal-note{margin:8px 0 0;font-size:11px;color:var(--faint);text-align:center}
@@ -166,6 +167,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .meetings-table th.col-mtime,.meetings-table td.col-mtime{width:170px;white-space:nowrap}
 .meetings-table tbody tr.meetings-row{cursor:pointer}
 .meetings-table tbody tr.meetings-row:hover td{background:var(--panel)}
+.meetings-table tbody tr.meetings-row-past td{background:#E3E2DE;color:var(--gray)}
+.meetings-table tbody tr.meetings-row-past:hover td{background:#D8D7D2}
 .meetings-table th{background:#CFE8FF;color:#0D2C4D}
 .icon-btn.icon-attachment-on{color:#1E63C7}
 .icon-btn.icon-attachment-on:hover{background:rgba(30,99,199,.14);color:#1E63C7}
