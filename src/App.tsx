@@ -74,6 +74,7 @@ export default function App() {
       <nav className="app-tabs">
         <button className={tab === 'dashboard' ? 'on' : ''} onClick={() => setTab('dashboard')}>Dashboard</button>
         <button className={tab === 'mytasks' ? 'on' : ''} onClick={() => setTab('mytasks')}>My Tasks</button>
+        <button onClick={() => window.open('https://gt4065b.github.io/wsubluebook/', '_blank', 'noopener,noreferrer')}>WSU Contacts</button>
       </nav>
 
       <main className="app-main">
