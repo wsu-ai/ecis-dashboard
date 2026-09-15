@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import type { Priority, TaskWithOwner } from '../lib/types'
-import { formatDateMDY, formatDueMDY, formatDueSmart } from '../lib/format'
+import { formatDateMDY, formatDueMDY, formatDueSmart, isDueTimeDefault } from '../lib/format'
 import { ATTACHMENT_ACCEPT, getAttachmentUrl, isAsciiFileName, uploadTaskAttachment } from '../lib/attachments'
 import { setTaskAttachment } from '../lib/tasks'
 
@@ -39,29 +39,36 @@ function daysUntilDueLabel(iso: string | null): string {
   return n === 0 ? 'Today' : String(n)
 }
 
-// 정렬 카테고리: 0) 만료  1) High  2) Medium  3) Low
-function sortRank(t: TaskWithOwner): number {
-  if (isExpired(t)) return 0
+// 정렬 카테고리: expiredAtBottom이면 만료를 맨 뒤로, 아니면 맨 앞으로 (0: 만료, 1) High  2) Medium  3) Low)
+function sortRank(t: TaskWithOwner, expiredAtBottom: boolean): number {
+  if (isExpired(t)) return expiredAtBottom ? 4 : 0
   return PRIO_RANK[effectivePriority(t)] + 1
 }
 
-// 정렬: 1) 만료 → High → Medium → Low, 2) 같은 카테고리는 마감일 순(기본은 오름차순=가까운 날짜 먼저, 마감일 없으면 항상 맨 뒤)
-export function sortTasks(rows: TaskWithOwner[], dueSortDir: 'asc' | 'desc' = 'asc'): TaskWithOwner[] {
+// 정렬: 1) 만료 → High → Medium → Low (expiredAtBottom이면 만료가 맨 뒤), 2) 같은 카테고리는 마감일 순
+// (기본은 오름차순=가까운 날짜 먼저, 마감일 없으면 항상 맨 뒤). 단, 만료가 맨 뒤로 갈 때는 만료 그룹 내에서 항상 마감일 내림차순.
+export function sortTasks(
+  rows: TaskWithOwner[],
+  dueSortDir: 'asc' | 'desc' = 'asc',
+  expiredAtBottom = false,
+): TaskWithOwner[] {
   return [...rows].sort((a, b) => {
-    const r = sortRank(a) - sortRank(b)
+    const r = sortRank(a, expiredAtBottom) - sortRank(b, expiredAtBottom)
     if (r !== 0) return r
+    const dir = expiredAtBottom && isExpired(a) && isExpired(b) ? 'desc' : dueSortDir
     const ta = a.due_date ? new Date(a.due_date).getTime() : null
     const tb = b.due_date ? new Date(b.due_date).getTime() : null
     if (ta === null && tb === null) return 0
     if (ta === null) return 1
     if (tb === null) return -1
-    return dueSortDir === 'asc' ? ta - tb : tb - ta
+    return dir === 'asc' ? ta - tb : tb - ta
   })
 }
 
 export default function TaskTable({
   rows, showDeleted, canModify, canEdit, onEdit, onDelete, onRefresh,
   hideOwner = false, hideStatus = false, hideEnterDate = false, dueSortDir = 'asc',
+  expiredAtBottom = false,
 }: {
   rows: TaskWithOwner[]
   showDeleted: boolean
@@ -74,9 +81,13 @@ export default function TaskTable({
   hideStatus?: boolean
   hideEnterDate?: boolean
   dueSortDir?: 'asc' | 'desc'
+  expiredAtBottom?: boolean // true면 만료된 업무를 맨 아래에, 마감일 내림차순으로 표시
 }) {
   const canEditFn = canEdit ?? canModify
-  const sorted = useMemo(() => sortTasks(rows, dueSortDir), [rows, dueSortDir])
+  const sorted = useMemo(
+    () => sortTasks(rows, dueSortDir, expiredAtBottom),
+    [rows, dueSortDir, expiredAtBottom],
+  )
   const baseColCount = 9 - (hideOwner ? 1 : 0) - (hideStatus ? 1 : 0) - (hideEnterDate ? 1 : 0)
   const colCount = baseColCount + (showDeleted ? 1 : 2)
 
@@ -173,7 +184,7 @@ export default function TaskTable({
                   <td className="col-center col-owner">{t.owner_name}{t.owner_department ? ` (${t.owner_department})` : ''}</td>
                 )}
                 {!hideStatus && <td className="col-center col-status">{t.status}</td>}
-                <td className="col-due">{t.due_date ? formatDueSmart(t.due_date) : 'TBD'}</td>
+                <td className={`col-due${t.due_date && isDueTimeDefault(t.due_date) ? ' col-center' : ''}`}>{t.due_date ? formatDueSmart(t.due_date) : 'TBD'}</td>
                 <td className="col-center col-taskdate">{t.task_date ? formatDateMDY(t.task_date) : '-'}</td>
                 {!hideEnterDate && <td className="col-enterdate">{formatDueMDY(t.created_at)}</td>}
                 {showDeleted && <td className="col-deleted">{t.deleter_name || '-'} / {t.deleted_at ? new Date(t.deleted_at).toLocaleString() : '-'}</td>}

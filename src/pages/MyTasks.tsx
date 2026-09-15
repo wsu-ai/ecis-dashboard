@@ -69,6 +69,7 @@ export default function MyTasks({ profile }: { profile: Profile }) {
           rows={mine}
           showDeleted={false}
           hideOwner
+          expiredAtBottom
           canModify={() => true}
           onEdit={openEdit}
           onDelete={remove}

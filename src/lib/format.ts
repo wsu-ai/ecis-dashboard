@@ -48,11 +48,18 @@ export function formatDueMDY(iso: string): string {
   return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()} ${pad(h)}:${pad(d.getMinutes())} ${ampm}`
 }
 
+// 시간이 11:59 PM(마감시간 기본값)인지 여부 — 날짜만 표시되는 경우를 판별
+export function isDueTimeDefault(iso: string): boolean {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return false
+  return d.getHours() === 23 && d.getMinutes() === 59
+}
+
 // ISO 타임스탬프 → "MM/DD/YYYY HH:MM AM", 단 시간이 11:59 PM(마감시간 기본값)이면 날짜만 표시
 export function formatDueSmart(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return iso
-  if (d.getHours() === 23 && d.getMinutes() === 59) {
+  if (isDueTimeDefault(iso)) {
     return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`
   }
   return formatDueMDY(iso)
