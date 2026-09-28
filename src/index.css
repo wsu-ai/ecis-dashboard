@@ -199,6 +199,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal2);b
 .task-table tr.prio-medium td{background:rgba(232,176,4,.13)}
 .task-table tr.prio-low td{background:rgba(63,164,91,.10)}
 
+/* ── 마감까지 3~7일 남은 업무: 초록 배경 (High 자동 승격 빨강보다 우선) ── */
+.task-table tr.due-soon-green td{background:#3FA45B;color:#fff}
+.task-table tr.due-soon-green .prio-dot{background:#fff}
+.task-table tr.due-soon-green .icon-btn{color:#fff}
+.task-table tr.due-soon-green .icon-btn:hover{background:rgba(255,255,255,.22);color:#fff}
+.task-table tr.due-soon-green .icon-attachment-on{color:#DFF5E6}
+
 /* ── 내 업무: 카드 목록 ── */
 .card-list{display:flex;flex-direction:column;gap:12px}
 .task-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px}

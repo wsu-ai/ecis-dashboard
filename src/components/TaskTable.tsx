@@ -31,6 +31,14 @@ function daysUntilDue(iso: string | null): number | null {
   return Math.round((due.getTime() - today.getTime()) / 86_400_000)
 }
 
+// 마감까지 3~7일(포함) 남은, 아직 완료/만료/삭제되지 않은 업무 = 초록 강조
+// (자동 High 승격 빨강보다 이 색이 우선한다)
+function isDueSoon(t: TaskWithOwner): boolean {
+  if (isExpired(t) || t.deleted_at || t.status === 'Completed') return false
+  const n = daysUntilDue(t.due_date)
+  return n !== null && n >= 3 && n <= 7
+}
+
 // 남은 일수 표시: 마감일 없으면 '-', 오늘이면 'Today'
 function daysUntilDueLabel(iso: string | null): string {
   const n = daysUntilDue(iso)
@@ -163,9 +171,10 @@ export default function TaskTable({
           {sorted.map((t) => {
             const ep = effectivePriority(t)
             const expired = isExpired(t)
+            const dueSoon = isDueSoon(t)
             return (
               <tr key={t.id}
-                className={expired ? 'expired' : prioClass(ep)}
+                className={expired ? 'expired' : dueSoon ? 'due-soon-green' : prioClass(ep)}
                 title={t.description || undefined}>
                 {!hidePriority && (
                   <td className="col-prio">
