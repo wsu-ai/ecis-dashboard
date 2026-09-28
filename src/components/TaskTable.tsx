@@ -33,7 +33,7 @@ function daysUntilDue(iso: string | null): number | null {
 
 // 마감까지 3~7일(포함) 남은, 아직 완료/만료/삭제되지 않은 업무 = 초록 강조
 // (자동 High 승격 빨강보다 이 색이 우선한다)
-function isDueSoon(t: TaskWithOwner): boolean {
+export function isDueSoon(t: TaskWithOwner): boolean {
   if (isExpired(t) || t.deleted_at || t.status === 'Completed') return false
   const n = daysUntilDue(t.due_date)
   return n !== null && n >= 3 && n <= 7

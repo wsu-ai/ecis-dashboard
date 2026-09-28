@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { TaskWithOwner } from '../lib/types'
-import { effectivePriority, isExpired } from './TaskTable'
+import { effectivePriority, isDueSoon, isExpired } from './TaskTable'
 import { koreanHolidayName } from '../lib/holidays'
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -86,7 +86,7 @@ export default function TaskCalendar({
                     ) : (
                       <button
                         key={t.id}
-                        className={`cal-dot ${isExpired(t) ? 'cal-dot-expired' : `prio-${effectivePriority(t).toLowerCase()}`}`}
+                        className={`cal-dot ${isExpired(t) ? 'cal-dot-expired' : isDueSoon(t) ? 'cal-dot-due-soon' : `prio-${effectivePriority(t).toLowerCase()}`}`}
                         onClick={() => onSelectTask(t)}
                         aria-label={t.title}
                       />
