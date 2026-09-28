@@ -7,10 +7,9 @@ import { setTaskAttachment } from '../lib/tasks'
 const WEEK_MS = 7 * 86_400_000
 const PRIO_RANK: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 }
 
-// 마감 일시가 이미 지난(완료/삭제 제외) 업무 = 만료
+// 마감 일시가 이미 지난(삭제 제외) 업무 = 만료. 완료(Completed) 상태여도 지난 마감일은 그대로 만료로 취급한다.
 export function isExpired(t: TaskWithOwner): boolean {
-  return !!t.due_date && new Date(t.due_date).getTime() < Date.now()
-    && t.status !== 'Completed' && !t.deleted_at
+  return !!t.due_date && new Date(t.due_date).getTime() < Date.now() && !t.deleted_at
 }
 
 // 마감이 일주일 이내(초과 포함)면 자동으로 High로 격상해서 표시한다. DB 값은 바꾸지 않는다.
